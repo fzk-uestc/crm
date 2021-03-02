@@ -8,6 +8,7 @@ import com.fzk.crm.utils.DateTimeUtil;
 import com.fzk.crm.utils.SqlSessionUtil;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,12 +47,18 @@ public class UserServiceImpl implements IUserService {
 
         //判断ip地址
         String allowIps = user.getAllowIps();
-        if(allowIps==null&&"".equals(allowIps)){
+        if(allowIps==null || "".equals(allowIps)){
             //说明没有对访问的ip地址设置限制
         }else if(!allowIps.contains(ip)){
             throw new LoginException("此ip地址不允许访问");
         }
         return user;
+    }
+
+    @Override
+    public List<User> getUserList() {
+        List<User> uList=userDao.getUserList();
+        return uList;
     }
 
 }

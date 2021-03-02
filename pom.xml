@@ -71,6 +71,7 @@
   </dependencies>
 
   <build>
+
     <resources>
       <resource>
         <directory>src/main/java</directory><!--所在的目录-->
@@ -81,7 +82,6 @@
         <filtering>false</filtering>
       </resource>
     </resources>
-
 
     <finalName>crm1.0</finalName>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
