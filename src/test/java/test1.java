@@ -24,4 +24,9 @@ public class test1 {
 
         System.out.println(user);
     }
+
+    @Test
+    public void test3(){
+
+    }
 }

@@ -17,11 +17,17 @@
     <script type="text/javascript"
             src="jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="jquery/bs_pagination/jquery.bs_pagination.min.css">
+    <%--必须放在bootstrap.min.js插件引入的下面，要先加载bootstrap--%>
+    <script type="text/javascript" src="jquery/bs_pagination/jquery.bs_pagination.min.js"></script>
+    <script type="text/javascript" src="jquery/bs_pagination/en.js"></script>
+
     <script type="text/javascript">
 
         $(function () {
             //为创建按钮绑定事件，打开添加操作的模态窗口
             $("#addBtn").click(function () {
+                //日历控件
                 $(".time").datetimepicker({
                     minView: "month",
                     language: 'zh-CN',
@@ -70,6 +76,7 @@
                 $.ajax({
                     url: "workbench/activity/saveActivity.do",
                     data: {
+                        // 习惯性的要去除左右字符串的空格，因为用户输入喜欢按空格
                         "owner": $.trim($("#create-marketActivityOwner").val()),
                         "name": $.trim($("#create-marketActivityName").val()),
                         "startDate": $.trim($("#create-startDate").val()),
@@ -84,8 +91,23 @@
                          data {"success":true/false}
                          */
                         if (data.success) {
-                            //添加成功，局部刷新市场活动列表
+                            //入口2.1：添加成功，局部刷新市场活动列表
+                            pageList(1, $("#activityPage").bs_pagination('getOption', 'rowsPerPage'));
 
+                            //清空添加操作模态窗口中的数据
+                            //提交表单
+                            // $("#activityAddForm").submit();
+                            //清空表单（重置表单）
+                            /*
+                            这里要注意：
+                                表单的jQuery对象提供了submit方法，
+                                但是没有提供reset方法去重置表单(坑处在于IDEA却显示有reset方法)
+
+                                虽然jQuery没有提供，但原生js对象提供了reset方法的
+                                所以此处要将jQuery对象转为原生dom对象
+                                    jQuery对象[下标]
+                             */
+                            $("#activityAddForm")[0].reset();
                             //关闭添加市场活动的模态窗口
                             $("#createActivityModal").modal("hide");
                         } else {
@@ -94,10 +116,197 @@
                     }
                 });
             });
+
+            //入口1：页面加载完成后触发加载市场活动信息列表的方法
+            //默认展开第一页，每页两条记录
+            pageList(1, 2);
+
+            //入口3：为查询按钮绑定事件，触发pageList方法
+            $("#searchBtn").click(function () {
+                /*
+                每次我们点击搜索的时候，应该将搜索框中的信息保存起来，保存到隐藏域之中
+                 */
+                $("#hidden-name").val($.trim($("#search-name").val()));
+                $("#hidden-owner").val($.trim($("#search-owner").val()));
+                $("#hidden-startDate").val($.trim($("#search-startDate").val()));
+                $("#hidden-endDate").val($.trim($("#search-endDate").val()));
+                pageList(1, $("#activityPage").bs_pagination('getOption', 'rowsPerPage'));
+            });
+
+
+            //为全选复选框框绑定单击事件
+            $("#checkAll").click(function () {
+                $("input[name='check']").prop("checked", this.checked);
+            });
+            //为复选框绑定单击事件，判断是否触发全选
+            //但是这种做法是不行的，因为动态生成的元素不能以普通方式进行绑定事件
+            /*$("input[name='check']").click(function (){
+                alert(123);
+            });*/
+            /*
+            动态绑定使用on方法
+             */
+            $("#activityBody").on("click", "input[name='check']", function () {
+                $("#checkAll").prop("checked", $("input[name='check']").length === $("input[name='check']:checked").length);
+            })
+
+
+            //为删除按钮绑定事件，执行市场活动删除操作
+            $("#deleteBtn").click(function () {
+                //首先要找到复选框中打√的jQuery对象
+                let $checked = $("input[name='check']:checked");
+                if ($checked.length === 0) {
+                    alert("请选择要删除的市场活动！")
+                } else {
+                    //友好的提示是否确认删除
+                    if (!window.confirm("确认要删除吗？")) {
+                        return false;
+                    }
+                    //选了一条或者多条
+                    //url:workbench/activity/delete.do?id=xxx&id=xxx&id=xxx
+                    //首先要拼接参数
+                    let param = "";
+                    //遍历$checked,取出每个input的value=activity.id
+                    for (let i = 0; i < $checked.length; i++) {
+                        if (i === 0) {
+                            param += "id=" + $checked[i].value;
+                        } else {
+                            param += "&id=" + $checked[i].value;
+                        }
+                    }
+
+
+                    //发送删除的ajax请求
+                    $.ajax({
+                        url: "workbench/activity/deleteActivity.do",
+                        data: param,
+                        type: "post",
+                        dataType: "json",
+                        success: function (data) {
+                            /*
+                            data
+                                {"success":true/false}
+                             */
+                            if (data.success) {
+                                //入口2.3：删除成功后，刷新市场活动列表,调用pageList方法
+                                pageList(1, $("#activityPage").bs_pagination('getOption', 'rowsPerPage'));
+                            } else {
+                                alert("删除失败！")
+                            }
+                        }
+                    });
+                }
+            });
+
+
         });
+
+
+        /*
+            对于所有的关系型数据库，做前端的分页相关操作的基础组件
+            就是pageNo和pageSize
+            pageNo：页码
+            pageSize：每页展示的记录数
+
+            在下列情况下需要刷新列表：
+                1. 点击左侧菜单中的“市场活动”超链接
+                2. 添加，修改和删除后都需要刷新
+                3. 点击查询按钮的时候
+                4. 点击分页组件的时候
+            以上6个入口都将要调用此方法
+         */
+        function pageList(pageNo, pageSize) {
+            //将复选框的全选框的√取消
+            $("#checkAll").prop("checked", false);
+
+            //查询前，将隐藏域中保存的信息取出来赋值给4个查询条件框
+            $("#search-name").val($.trim($("#hidden-name").val()));
+            $("#search-owner").val($.trim($("#hidden-owner").val()));
+            $("#search-startDate").val($.trim($("#hidden-startDate").val()));
+            $("#search-endDate").val($.trim($("#hidden-endDate").val()));
+            $.ajax({
+                url: "workbench/activity/pageList.do",
+                data: {
+                    "pageNo": pageNo,
+                    "pageSize": pageSize,
+                    "name": $.trim($("#search-name").val()),
+                    "owner": $.trim($("#search-owner").val()),
+                    "startDate": $.trim($("#search-startDate").val()),
+                    "endDate": $.trim($("#search-endDate").val())
+                },
+                type: "get",
+                dataType: "json",
+                success: function (data) {
+
+                    /*
+                    data    json串
+                        我们需要的：
+                        [{市场活动1},{2},{3}...] List<Activity> dataList
+                        分页插件需要的：查询出来的总记录数
+                        {"total":100}  int total
+
+                        则json串
+                        {"total":100,"dataList":[{市场活动1},{2},{3}...]}
+                     */
+                    let html = "";
+                    $.each(data.dataList, function (i, n) {
+                        <%--模板如下：
+                        <tr class="active">
+                            <td><input type="checkbox"/></td>
+                            <td><a style="text-decoration: none; cursor: pointer;"
+                                   onclick="window.location.href='workbench/activity/detail.jsp';">发传单</a></td>
+                            <td>zhangsan</td>
+                            <td>2020-10-10</td>
+                            <td>2020-10-20</td>
+                         </tr>
+                         --%>
+                        html += "<tr class=\"active\">" +
+                            "<td><input type=\"checkbox\" name=\"check\" value=\"" + n.id + "\"/></td>" +
+                            "<td><a style=\"text-decoration: none; cursor: pointer;\"" +
+                            "onclick=\"window.location.href='workbench/activity/detail.jsp';\">" +
+                            n.name + "</a></td>" +
+                            "<td>" + n.owner + "</td>" +
+                            "<td>" + n.startDate + "</td>" +
+                            "<td>" + n.endDate + "</td></tr>";
+
+                        //显示市场活动列表
+                        $("#activityBody").html(html);
+
+                    });
+                    //计算总页数
+                    let totalPages = Math.ceil(data.total / pageSize);
+                    //数据处理完毕之后，结合分页查询，对前端展现分页信息
+                    $("#activityPage").bs_pagination({
+                        currentPage: pageNo, // 页码
+                        rowsPerPage: pageSize, // 每页显示的记录条数
+                        maxRowsPerPage: 20, // 每页最多显示的记录条数
+                        totalPages: totalPages, // 总页数
+                        totalRows: data.total, // 总记录条数
+
+                        visiblePageLinks: 3, // 显示几个卡片
+
+                        showGoToPage: true,
+                        showRowsPerPage: true,
+                        showRowsInfo: true,
+                        showRowsDefaultInfo: true,
+
+                        //这里要调用自己写的这个查询方法进行分页查询
+                        onChangePage: function (event, data) {
+                            pageList(data.currentPage, data.rowsPerPage);
+                        }
+                    });
+                }
+            });
+        }
     </script>
 </head>
 <body>
+
+<%--隐藏域：将查询条件保存在隐藏域中--%>
+<input type="hidden" id="hidden-name"/>
+<input type="hidden" id="hidden-owner"/>
+<input type="hidden" id="hidden-startDate"/>
+<input type="hidden" id="hidden-endDate"/>
 
 <!-- 创建市场活动的模态窗口 -->
 <div class="modal fade" id="createActivityModal" role="dialog">
@@ -111,7 +320,7 @@
             </div>
             <div class="modal-body">
 
-                <form class="form-horizontal" role="form">
+                <form id="activityAddForm" class="form-horizontal" role="form">
 
                     <div class="form-group">
                         <label for="create-marketActivityOwner" class="col-sm-2 control-label">所有者<span
@@ -253,14 +462,14 @@
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-addon">名称</div>
-                        <input class="form-control" type="text">
+                        <input class="form-control" type="text" id="search-name">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-addon">所有者</div>
-                        <input class="form-control" type="text">
+                        <input class="form-control" type="text" id="search-owner">
                     </div>
                 </div>
 
@@ -268,17 +477,17 @@
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-addon">开始日期</div>
-                        <input class="form-control" type="text" id="startTime"/>
+                        <input class="form-control" type="text" id="search-startDate"/>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-addon">结束日期</div>
-                        <input class="form-control" type="text" id="endTime">
+                        <input class="form-control" type="text" id="search-endDate">
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-default">查询</button>
+                <button type="button" id="searchBtn" class="btn btn-default">查询</button>
 
             </form>
         </div>
@@ -297,13 +506,15 @@
                         所以未来的项目开发，对于触发模态窗口操作，不能写死在元素当中
                         应该由我们自己写js代码来操作
                         --%>
-                <button type="button" id="addBtn" class="btn btn-primary">
-                    <span class="glyphicon glyphicon-plus"></span> 创建
+                <button type="button" class="btn btn-primary" id="addBtn"><span class="glyphicon glyphicon-plus"></span>
+                    创建
                 </button>
                 <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span
                         class="glyphicon glyphicon-pencil"></span> 修改
                 </button>
-                <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
+                <button type="button" class="btn btn-danger" id="deleteBtn"><span
+                        class="glyphicon glyphicon-minus"></span> 删除
+                </button>
             </div>
 
         </div>
@@ -311,15 +522,15 @@
             <table class="table table-hover">
                 <thead>
                 <tr style="color: #B3B3B3;">
-                    <td><input type="checkbox"/></td>
+                    <td><input type="checkbox" id="checkAll"/></td>
                     <td>名称</td>
                     <td>所有者</td>
                     <td>开始日期</td>
                     <td>结束日期</td>
                 </tr>
                 </thead>
-                <tbody>
-                <tr class="active">
+                <tbody id="activityBody">
+                <%--<tr class="active">
                     <td><input type="checkbox"/></td>
                     <td><a style="text-decoration: none; cursor: pointer;"
                            onclick="window.location.href='workbench/activity/detail.jsp';">发传单</a></td>
@@ -334,13 +545,14 @@
                     <td>zhangsan</td>
                     <td>2020-10-10</td>
                     <td>2020-10-20</td>
-                </tr>
+                </tr>--%>
                 </tbody>
             </table>
         </div>
 
         <div style="height: 50px; position: relative;top: 30px;">
-            <div>
+            <div id="activityPage"></div>
+            <%--<div>
                 <button type="button" class="btn btn-default" style="cursor: default;">共<b>50</b>条记录</button>
             </div>
             <div class="btn-group" style="position: relative;top: -34px; left: 110px;">
@@ -371,7 +583,7 @@
                         <li class="disabled"><a href="#">末页</a></li>
                     </ul>
                 </nav>
-            </div>
+            </div>--%>
         </div>
 
     </div>

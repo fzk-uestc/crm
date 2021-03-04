@@ -5,5 +5,19 @@
 
 <mapper namespace="com.fzk.crm.workbench.dao.ActivityRemarkDao">
 
+    <select id="getCountByAids" resultType="int">
+        select count(*) from tbl_activity_remark
+        where activityId in
+        <foreach collection="array" item="aid" open="(" close=")" separator=",">
+            #{aid}
+        </foreach>
+    </select>
+    <delete id="deleteByAids">
+        delete from tbl_activity_remark
+        where activityId in
+        <foreach collection="array" item="aid" open="(" close=")" separator=",">
+            #{aid}
+        </foreach>
+    </delete>
 
 </mapper>
