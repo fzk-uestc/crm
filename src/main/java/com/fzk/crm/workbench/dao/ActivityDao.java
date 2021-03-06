@@ -20,4 +20,7 @@ public interface ActivityDao {
 
     int deleteActivity(String[] ids);
 
+    Activity getActivityById(String activityId);
+
+    int updateActivity(Activity activity);
 }

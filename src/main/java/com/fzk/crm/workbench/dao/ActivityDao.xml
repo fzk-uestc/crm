@@ -11,30 +11,30 @@
     </insert>
     <select id="getActivityListByCondition" parameterType="map" resultType="com.fzk.crm.workbench.domain.Activity">
         select
-            a.id,
-            a.name,
-            u.name as owner,
-            a.startDate,
-            a.endDate
+        a.id,
+        a.name,
+        u.name as owner,
+        a.startDate,
+        a.endDate
         from tbl_activity a
         join tbl_user u
         on a.owner=u.id
         <where>
-         <if test="name!=null and name!=''">
-             and a.name like '%' #{name} '%'
-         </if>
-         <if test="owner!=null and owner!=''">
-            and u.name like '%' #{owner} '%'
-         </if>
-         <if test="startDate!=null and startDate!=''">
-             and a.startDate &gt;= #{startDate}
-             /*
+            <if test="name!=null and name!=''">
+                and a.name like '%' #{name} '%'
+            </if>
+            <if test="owner!=null and owner!=''">
+                and u.name like '%' #{owner} '%'
+            </if>
+            <if test="startDate!=null and startDate!=''">
+                and a.startDate &gt;= #{startDate}
+                /*
                 注意：在xml中>符号要用&gt;表示
-             */
-         </if>
-         <if test="endDate!=null and endDate!=''">
-             and a.endDate &lt;= #{endDate}
-         </if>
+                */
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                and a.endDate &lt;= #{endDate}
+            </if>
         </where>
         order by a.createTime desc
         limit #{index},#{pageSize}
@@ -71,6 +71,25 @@
             </if>
         </where>
     </delete>
+
+    <select id="getActivityById" resultType="com.fzk.crm.workbench.domain.Activity">
+        select * from tbl_activity where id=#{activityId};
+    </select>
+
+    <update id="updateActivity" parameterType="com.fzk.crm.workbench.domain.Activity">
+        update tbl_activity
+        set
+        id=#{id},
+        owner=#{owner},
+        name=#{name},
+        startDate=#{startDate},
+        endDate=#{endDate},
+        cost=#{cost},
+        description=#{description},
+        editTime=#{editTime},
+        editBy=#{editBy}
+        where id=#{id};
+    </update>
 </mapper>
 
 

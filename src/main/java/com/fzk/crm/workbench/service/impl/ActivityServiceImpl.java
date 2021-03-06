@@ -1,5 +1,7 @@
 package com.fzk.crm.workbench.service.impl;
 
+import com.fzk.crm.settings.dao.UserDao;
+import com.fzk.crm.settings.domain.User;
 import com.fzk.crm.utils.SqlSessionUtil;
 import com.fzk.crm.vo.PaginationVO;
 import com.fzk.crm.workbench.dao.ActivityDao;
@@ -7,7 +9,9 @@ import com.fzk.crm.workbench.dao.ActivityRemarkDao;
 import com.fzk.crm.workbench.domain.Activity;
 import com.fzk.crm.workbench.domain.ActivityRemark;
 import com.fzk.crm.workbench.service.IActivityService;
+import org.apache.ibatis.session.SqlSessionFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,10 +22,10 @@ import java.util.Map;
 public class ActivityServiceImpl implements IActivityService {
     private ActivityDao activityDao = SqlSessionUtil.getSqlSession().getMapper(ActivityDao.class);
     private ActivityRemarkDao activityRemarkDao = SqlSessionUtil.getSqlSession().getMapper(ActivityRemarkDao.class);
+    private UserDao userDao= SqlSessionUtil.getSqlSession().getMapper(UserDao.class);
 
     @Override
     public boolean saveActivity(Activity activity) {
-        System.out.println("进入到业务层saveActivity()...");
         int count = activityDao.saveActivity(activity);
         return count == 1;
     }
@@ -53,10 +57,63 @@ public class ActivityServiceImpl implements IActivityService {
         }
         //删除市场活动
         int count3 = activityDao.deleteActivity(ids);
-        System.out.println("count1="+count1+";count2="+ count2+";count3="+count3+";ids.length="+ids.length);
-        if(count3!= ids.length){
-            flag=false;
+        System.out.println("count1=" + count1 + ";count2=" + count2 + ";count3=" + count3 + ";ids.length=" + ids.length);
+        if (count3 != ids.length) {
+            flag = false;
         }
         return flag;
+    }
+
+    @Override
+    public Map<String, Object> getUserListAndActivity(String activityId) {
+        //取userList
+        List<User> userList = userDao.getUserList();
+        //取activity
+        Activity activity=activityDao.getActivityById(activityId);
+        //打包为map
+        Map<String, Object> map = new HashMap<>();
+        map.put("userList",userList);
+        map.put("activity",activity);
+        //返回map
+        return map;
+    }
+
+    @Override
+    public boolean updateActivity(Activity activity) {
+        int count = activityDao.updateActivity(activity);
+        return count == 1;
+    }
+
+    @Override
+    public Activity detail(String activityId) {
+        Activity activity = activityDao.getActivityById(activityId);
+        //但是此时的activity中的owner是id形式的
+        //查出user后把name设置到activity.owner
+        User user=userDao.getUserById(activity.getOwner());
+        activity.setOwner(user.getName());
+        return activity;
+    }
+
+    @Override
+    public List<ActivityRemark> getRemarkListByActivityId(String activityId) {
+        return activityRemarkDao.getRemarkListByActivityId(activityId);
+    }
+
+    @Override
+    public boolean deleteRemark(String remarkId) {
+        int count=activityRemarkDao.deleteRemarkById(remarkId);
+        return count==1;
+    }
+
+    @Override
+    public boolean saveRemark(ActivityRemark activityRemark) {
+        int count=activityRemarkDao.saveRemark(activityRemark);
+        return count==1;
+    }
+
+    @Override
+    public boolean updateRemark(ActivityRemark activityRemark) {
+        int count=activityRemarkDao.updateRemark(activityRemark);
+        return count==1;
     }
 }

@@ -6,6 +6,7 @@ import com.fzk.crm.settings.service.impl.UserServiceImpl;
 import com.fzk.crm.utils.*;
 import com.fzk.crm.vo.PaginationVO;
 import com.fzk.crm.workbench.domain.Activity;
+import com.fzk.crm.workbench.domain.ActivityRemark;
 import com.fzk.crm.workbench.service.IActivityService;
 import com.fzk.crm.workbench.service.impl.ActivityServiceImpl;
 
@@ -38,9 +39,22 @@ public class ActivityController extends HttpServlet {
             pageList(request, response);
         } else if ("/workbench/activity/deleteActivity.do".equals(path)) {
             deleteActivity(request, response);
+        } else if ("/workbench/activity/getUserListAndActivity.do".equals(path)) {
+            getUserListAndActivity(request, response);
+        } else if ("/workbench/activity/updateActivity.do".equals(path)) {
+            updateActivity(request, response);
+        } else if ("/workbench/activity/detail.do".equals(path)) {
+            detail(request, response);
+        } else if ("/workbench/activity/getRemarkListByActivityId.do".equals(path)) {
+            getRemarkListByActivityId(request, response);
+        } else if ("/workbench/activity/deleteRemark.do".equals(path)) {
+            deleteRemark(request, response);
+        } else if ("/workbench/activity/saveRemark.do".equals(path)) {
+            saveRemark(request, response);
+        } else if ("/workbench/activity/updateRemark.do".equals(path)) {
+            updateRemark(request, response);
         }
     }
-
 
     private void getUserList(HttpServletRequest request, HttpServletResponse response) {
 
@@ -144,7 +158,7 @@ public class ActivityController extends HttpServlet {
 
         //取出请求删除的id集合
         String[] ids = request.getParameterValues("id");
-        for (String id:ids) {
+        for (String id : ids) {
             System.out.println(id);
         }
         //调用业务层
@@ -152,10 +166,200 @@ public class ActivityController extends HttpServlet {
                 (IActivityService) ServiceFactory.
                         getService(new ActivityServiceImpl());
 
-        boolean flag=activityService.deleteActivity(ids);
+        boolean flag = activityService.deleteActivity(ids);
 
         //返回json串
-        PrintJson.printJsonFlag(response,flag);
+        PrintJson.printJsonFlag(response, flag);
     }
+
+    private void getUserListAndActivity(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("进入到ActivityController的getUserListAndActivity()...");
+        //取出要修改的市场活动的id
+        String activityId = request.getParameter("id");
+
+        //调用业务层
+        IActivityService activityService =
+                (IActivityService) ServiceFactory.
+                        getService(new ActivityServiceImpl());
+        /*
+        总结：
+            controller调用service方法，前端值要什么，service返回值就是什么
+        userList
+        activity
+        这两项信息复用率不高，选map，而不选vo
+         */
+        Map<String, Object> map = activityService.getUserListAndActivity(activityId);
+
+        //返回json
+        PrintJson.printJsonObj(response, map);
+    }
+
+    private void updateActivity(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("进入到ActivityController的updateActivity()...");
+
+        //取出参数
+        String id = request.getParameter("id");
+        String owner = request.getParameter("owner");
+        String name = request.getParameter("name");
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+        String cost = request.getParameter("cost");
+        String description = request.getParameter("description");
+        //修改时间：当前系统时间
+        String editTime = DateTimeUtil.getSysTime();
+        //修改人：当前登录用户
+        String editBy = ((User) request.getSession().getAttribute("user")).getName();
+
+        //向service层传activity
+        Activity activity = new Activity();
+        activity.setId(id);
+        activity.setOwner(owner);
+        activity.setName(name);
+        activity.setStartDate(startDate);
+        activity.setEndDate(endDate);
+        activity.setCost(cost);
+        activity.setDescription(description);
+        activity.setEditTime(editTime);
+        activity.setEditBy(editBy);
+
+        //调用业务层
+        IActivityService activityService =
+                (IActivityService) ServiceFactory.
+                        getService(new ActivityServiceImpl());
+        boolean flag = activityService.updateActivity(activity);
+
+        //返回json
+        PrintJson.printJsonFlag(response, flag);
+    }
+
+    private void detail(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        System.out.println("进入到ActivityController的detail()...");
+
+        //取出activity.id
+        String activityId = request.getParameter("id");
+        /*
+        前端这里需要跳转页面，那么就将查询到的activity保存在request域中，请求转发
+         */
+        //调用业务层
+        IActivityService activityService =
+                (IActivityService) ServiceFactory.
+                        getService(new ActivityServiceImpl());
+        Activity activity = activityService.detail(activityId);
+        System.out.println(activity);
+        request.setAttribute("activity", activity);
+        // 请求转发
+        request.getRequestDispatcher("/workbench/activity/detail.jsp").forward(request, response);
+    }
+
+    private void getRemarkListByActivityId(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("进入到ActivityController的getRemarkListByActivityId()...");
+
+        //取出参数
+        String activityId = request.getParameter("activityId");
+
+        /*
+          data
+               [{remark1},{2},{3}]
+        */
+        //调用业务层
+        IActivityService activityService =
+                (IActivityService) ServiceFactory.
+                        getService(new ActivityServiceImpl());
+        List<ActivityRemark> list = activityService.getRemarkListByActivityId(activityId);
+        //返回json
+        PrintJson.printJsonObj(response, list);
+    }
+
+    private void deleteRemark(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("进入到ActivityController的deleteRemark()...");
+
+        //取前端参数remarkId
+        String remarkId = request.getParameter("remarkId");
+
+        //调用业务层
+        IActivityService activityService =
+                (IActivityService) ServiceFactory.
+                        getService(new ActivityServiceImpl());
+        boolean flag = activityService.deleteRemark(remarkId);
+
+        //返回json串
+        PrintJson.printJsonFlag(response, flag);
+    }
+
+    private void saveRemark(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("进入到ActivityController的saveRemark()...");
+
+        //取出前端参数
+        String noteContent=request.getParameter("noteContent");
+        String activityId=request.getParameter("activityId");
+        //备注的其他信息
+        String remarkId = UUIDUtil.getUUID();
+        String createTime = DateTimeUtil.getSysTime();
+        String createBy=((User)request.getSession().getAttribute("user")).getName();
+        String editFlag="0";
+
+        ActivityRemark activityRemark=new ActivityRemark();
+        activityRemark.setId(remarkId);
+        activityRemark.setNoteContent(noteContent);
+        activityRemark.setCreateBy(createBy);
+        activityRemark.setCreateTime(createTime);
+        activityRemark.setEditFlag(editFlag);
+        activityRemark.setActivityId(activityId);
+
+        //调用业务层
+        IActivityService activityService =
+                (IActivityService) ServiceFactory.
+                        getService(new ActivityServiceImpl());
+        boolean flag = activityService.saveRemark(activityRemark);
+
+        //保存到map
+        /*
+        data
+            {"success":true/false,"remark":{备注}}
+         */
+        Map<String,Object> map=new HashMap<>();
+        map.put("success",flag);
+        map.put("remark",activityRemark);
+        //返回json
+        PrintJson.printJsonObj(response,map);
+    }
+
+
+    private void updateRemark(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("进入到ActivityController的updateRemark()...");
+
+        //取出前端参数remarkId和noteContent
+        String remarkId=request.getParameter("remarkId");
+        String noteContent=request.getParameter("noteContent");
+        //修改时间、修改人、editFlag
+        String editTime = DateTimeUtil.getSysTime();
+        String editBy=((User)request.getSession().getAttribute("user")).getName();
+        String editFlag="1";
+
+        ActivityRemark activityRemark=new ActivityRemark();
+        activityRemark.setId(remarkId);
+        activityRemark.setNoteContent(noteContent);
+        activityRemark.setEditTime(editTime);
+        activityRemark.setEditBy(editBy);
+        activityRemark.setEditFlag(editFlag);
+
+        //调用业务层
+        IActivityService activityService =
+                (IActivityService) ServiceFactory.
+                        getService(new ActivityServiceImpl());
+        boolean flag = activityService.updateRemark(activityRemark);
+
+        //保存到map
+        /*
+        data
+            {"success":true/false,"remark":{备注}}
+         */
+        Map<String,Object> map=new HashMap<>();
+        map.put("success",flag);
+        map.put("remark",activityRemark);
+        //返回json
+        PrintJson.printJsonObj(response,map);
+    }
+
 
 }

@@ -12,6 +12,9 @@
     <select id="getUserList" resultType="com.fzk.crm.settings.domain.User">
         select * from tbl_user;
     </select>
+    <select id="getUserById" resultType="com.fzk.crm.settings.domain.User">
+        select * from tbl_user where id=#{id};
+    </select>
 </mapper>
 
 

@@ -19,5 +19,34 @@
             #{aid}
         </foreach>
     </delete>
-
+    <select id="getRemarkListByActivityId" resultType="com.fzk.crm.workbench.domain.ActivityRemark">
+        select * from tbl_activity_remark
+        where activityId=#{activityId};
+    </select>
+    <delete id="deleteRemarkById">
+        delete from tbl_activity_remark
+        where id=#{remarkId};
+    </delete>
+    <insert id="saveRemark" parameterType="com.fzk.crm.workbench.domain.ActivityRemark">
+        insert into tbl_activity_remark
+        (
+            id,
+            noteContent,
+            createTime,
+            createBy,
+            editFlag,
+            activityId
+        )
+        values
+        (#{id},#{noteContent},#{createTime},#{createBy},#{editFlag},#{activityId})
+    </insert>
+    <update id="updateRemark" parameterType="com.fzk.crm.workbench.domain.ActivityRemark">
+        update tbl_activity_remark
+        set
+        noteContent=#{noteContent},
+        editTime=#{editTime},
+        editBy=#{editBy},
+        editFlag=#{editFlag}
+        where id=#{id};
+    </update>
 </mapper>
