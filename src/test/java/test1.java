@@ -3,6 +3,7 @@ import com.fzk.crm.settings.domain.User;
 import com.fzk.crm.settings.service.IUserService;
 import com.fzk.crm.settings.service.impl.UserServiceImpl;
 import com.fzk.crm.utils.DateTimeUtil;
+import com.fzk.crm.utils.MD5Util;
 import com.fzk.crm.utils.ServiceFactory;
 import com.fzk.crm.workbench.domain.Activity;
 import org.junit.Test;
@@ -18,8 +19,8 @@ import java.lang.reflect.Method;
 public class test1 {
     @Test
     public void test1() {
-        String sysTime = DateTimeUtil.getSysTime();
-        System.out.println(sysTime);
+        String md5 = MD5Util.getMD5("010326");
+        System.out.println(md5);
     }
 
     @Test

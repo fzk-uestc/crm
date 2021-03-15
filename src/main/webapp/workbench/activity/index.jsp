@@ -14,11 +14,9 @@
     <script type="text/javascript" src="jquery/jquery-1.11.1-min.js"></script>
     <script type="text/javascript" src="jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
-    <script type="text/javascript"
-            src="jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
-
+    <script type="text/javascript" src="jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
+    <%--分页插件：必须放在bootstrap.min.js插件引入的下面，要先加载bootstrap--%>
     <link rel="stylesheet" type="text/css" href="jquery/bs_pagination/jquery.bs_pagination.min.css">
-    <%--必须放在bootstrap.min.js插件引入的下面，要先加载bootstrap--%>
     <script type="text/javascript" src="jquery/bs_pagination/jquery.bs_pagination.min.js"></script>
     <script type="text/javascript" src="jquery/bs_pagination/en.js"></script>
 
@@ -52,7 +50,7 @@
                         $.each(data, function (i, user) {
                             //这里用拼串方式，当然也可以调用jquery的append方法
                             //以id作为选项的值，以name作为显示内容
-                            html += "<option value=" + user.id + ">" + user.name + "</option>";
+                            html += "<option value='" + user.id + "'>" + user.name + "</option>";
                         });
                         $("#create-marketActivityOwner").html(html);
                         //将当前登录的用户设置为下拉框默认选项
@@ -358,11 +356,10 @@
                             "<td>" + n.owner + "</td>" +
                             "<td>" + n.startDate + "</td>" +
                             "<td>" + n.endDate + "</td></tr>";
-
-                        //显示市场活动列表
-                        $("#activityBody").html(html);
-
                     });
+                    //显示市场活动列表
+                    $("#activityBody").html(html);
+
                     //计算总页数
                     let totalPages = Math.ceil(data.total / pageSize);
                     //数据处理完毕之后，结合分页查询，对前端展现分页信息
@@ -380,7 +377,7 @@
                         showRowsInfo: true,
                         showRowsDefaultInfo: true,
 
-                        //这里要调用自己写的这个查询方法进行分页查询
+                        //入口4：这里要调用自己写的这个查询方法进行分页查询
                         onChangePage: function (event, data) {
                             pageList(data.currentPage, data.rowsPerPage);
                         }

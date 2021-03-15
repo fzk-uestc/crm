@@ -57,8 +57,6 @@ public class ActivityController extends HttpServlet {
     }
 
     private void getUserList(HttpServletRequest request, HttpServletResponse response) {
-
-        System.out.println("进入到取得用户信息列表getUserList()...");
         IUserService userService = (IUserService) ServiceFactory.getService(new UserServiceImpl());
         List<User> uList = userService.getUserList();
         PrintJson.printJsonObj(response, uList);

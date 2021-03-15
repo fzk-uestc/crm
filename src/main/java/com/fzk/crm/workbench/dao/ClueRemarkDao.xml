@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fzk.crm.workbench.dao.ClueRemarkDao">
+
+    <select id="getCountByClueIds" parameterType="arraylist" resultType="int">
+        select count(*) from tbl_clue_remark
+        <where>
+            <if test="array!=null and array.length>0">
+                <foreach collection="array" open="clueId in (" close=")" separator="," item="clueId">
+                    #{clueId}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <delete id="deleteRemarkByClueIds" parameterType="arraylist">
+        delete from tbl_clue_remark
+        <where>
+            <if test="array!=null and array.length>0">
+                <foreach collection="array" open="clueId in (" close=")" separator="," item="clueId">
+                    #{clueId}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+
+    <select id="getRemarkListByClueId" resultType="com.fzk.crm.workbench.domain.ClueRemark">
+        select * from tbl_clue_remark where clueId=#{clueId};
+    </select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

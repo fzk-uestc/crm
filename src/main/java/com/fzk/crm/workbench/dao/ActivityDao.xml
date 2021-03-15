@@ -90,6 +90,48 @@
         editBy=#{editBy}
         where id=#{id};
     </update>
+
+    <select id="getActivityByClueId" resultType="com.fzk.crm.workbench.domain.Activity">
+        select
+        a.name,a.startDate,a.endDate,u.name as owner,car.id as id
+        from tbl_activity a
+        join tbl_clue_activity_relation car
+        on a.id=car.activityId
+        join tbl_user u
+        on a.owner=u.id
+        where car.clueId=#{clueId};
+    </select>
+
+    <select id="getActivityByNameAndNotRelationClueId" resultType="com.fzk.crm.workbench.domain.Activity">
+        select
+        a.id,
+        a.name,
+        u.name as owner,
+        a.startDate,
+        a.endDate
+        from tbl_activity a
+        join tbl_user u
+        on a.owner=u.id
+        where a.id not in (
+            select activityId
+            from tbl_clue_activity_relation
+            where clueId=#{clueId}
+        )
+        and a.name like '%' #{activityName} '%'
+    </select>
+
+    <select id="getActivityListByName" resultType="com.fzk.crm.workbench.domain.Activity">
+       select
+        a.id,
+        a.name,
+        u.name as owner,
+        a.startDate,
+        a.endDate
+        from tbl_activity a
+        join tbl_user u
+        on a.owner=u.id
+        where a.name like '%' #{activityName} '%';
+    </select>
 </mapper>
 
 

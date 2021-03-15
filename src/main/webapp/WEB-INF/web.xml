@@ -27,6 +27,12 @@
         <url-pattern>*.do</url-pattern>
     </filter-mapping>
 
+    <!--配置监听ServletContext创建的监听器-->
+    <listener>
+        <listener-class>com.fzk.crm.web.listener.SysInitListener</listener-class>
+    </listener>
+
+
     <!--用户控制器-->
     <servlet>
         <servlet-name>UserController</servlet-name>
@@ -55,6 +61,45 @@
         <url-pattern>/workbench/activity/deleteRemark.do</url-pattern>
         <url-pattern>/workbench/activity/saveRemark.do</url-pattern>
         <url-pattern>/workbench/activity/updateRemark.do</url-pattern>
+    </servlet-mapping>
+
+    <!--线索控制器-->
+    <servlet>
+        <servlet-name>ClueController</servlet-name>
+        <servlet-class>com.fzk.crm.workbench.controller.ClueController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ClueController</servlet-name>
+        <url-pattern>/workbench/clue/getUserList.do</url-pattern>
+        <url-pattern>/workbench/clue/pageList.do</url-pattern>
+        <url-pattern>/workbench/clue/saveClue.do</url-pattern>
+        <url-pattern>/workbench/clue/detail.do</url-pattern>
+        <url-pattern>/workbench/clue/getActivityByClueId.do</url-pattern>
+        <url-pattern>/workbench/clue/unbund.do</url-pattern>
+        <url-pattern>/workbench/clue/getActivityListByNameAndNotRelationClueId.do</url-pattern>
+        <url-pattern>/workbench/clue/bund.do</url-pattern>
+        <url-pattern>/workbench/clue/getUserListAndClue.do</url-pattern>
+        <url-pattern>/workbench/clue/updateClue.do</url-pattern>
+        <url-pattern>/workbench/clue/deleteClueByIds.do</url-pattern>
+        <url-pattern>/workbench/clue/getActivityListByName.do</url-pattern>
+        <url-pattern>/workbench/clue/convert.do</url-pattern>
+    </servlet-mapping>
+
+    <!--交易控制器-->
+    <servlet>
+        <servlet-name>TranController</servlet-name>
+        <servlet-class>com.fzk.crm.workbench.controller.TranController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TranController</servlet-name>
+        <url-pattern>/workbench/transaction/addTran.do</url-pattern>
+        <url-pattern>/workbench/transaction/getActivityListByName.do</url-pattern>
+        <url-pattern>/workbench/transaction/getContactsListByName.do</url-pattern>
+        <url-pattern>/workbench/transaction/getCustomerNameList.do</url-pattern>
+        <url-pattern>/workbench/transaction/saveTran.do</url-pattern>
+        <url-pattern>/workbench/transaction/detail.do</url-pattern>
+        <url-pattern>/workbench/transaction/getTranHistoryListByTranId.do</url-pattern>
+        <url-pattern>/workbench/transaction/changeStage.do</url-pattern>
     </servlet-mapping>
 </web-app>
 
