@@ -73,6 +73,85 @@
         set stage=#{stage},editBy=#{editBy},editTime=#{editTime}
         where id=#{id};
     </update>
+
+    <select id="getTranListByCondition" parameterType="map" resultType="com.fzk.crm.workbench.domain.Tran">
+        select
+        tran.id,
+        tran.name,
+        customer.name as customerId,
+        tran.stage,
+        tran.type,
+        user.name as owner,
+        tran.source,
+        contacts.fullname as contactsId
+        from tbl_tran tran
+        join tbl_user user on tran.owner=user.id
+        join tbl_customer customer on tran.customerId=customer.id
+        join tbl_contacts contacts on tran.contactsId=contacts.id
+        <where>
+            <if test="owner!=null and owner!=''">
+                and user.name like '%' #{owner} '%'
+            </if>
+            <if test="name!=null and name!=''">
+                and tran.name like '%' #{name} '%'
+            </if>
+            <if test="customerName!=null and customerName!=''">
+                and customer.name like '%' #{customerName} '%'
+            </if>
+            <if test="stage!=null and stage!=''">
+                and tran.stage=#{stage}
+            </if>
+            <if test="type!=null and type!=''">
+                and tran.type=#{type}
+            </if>
+            <if test="source!=null and source!=''">
+                and tran.source=#{source}
+            </if>
+            <if test="contactsName!=null and contactsName!=''">
+                and contacts.fullname like '%' #{contactsName} '%'
+            </if>
+        </where>
+        order by tran.createTime desc
+        limit #{index},#{pageSize}
+    </select>
+    <select id="getTotalByCondition" parameterType="map" resultType="int">
+        select count(*)
+        from tbl_tran tran
+        join tbl_user user on tran.owner=user.id
+        join tbl_customer customer on tran.customerId=customer.id
+        join tbl_contacts contacts on tran.contactsId=contacts.id
+        <where>
+            <if test="owner!=null and owner!=''">
+                and user.name like '%' #{owner} '%'
+            </if>
+            <if test="name!=null and name!=''">
+                and tran.name like '%' #{name} '%'
+            </if>
+            <if test="customerName!=null and customerName!=''">
+                and customer.name like '%' #{customerName} '%'
+            </if>
+            <if test="stage!=null and stage!=''">
+                and tran.stage=#{stage}
+            </if>
+            <if test="type!=null and type!=''">
+                and tran.type=#{type}
+            </if>
+            <if test="source!=null and source!=''">
+                and tran.source=#{source}
+            </if>
+            <if test="contactsName!=null and contactsName!=''">
+                and contacts.fullname like '%' #{contactsName} '%'
+            </if>
+        </where>
+    </select>
+
+    <select id="getTotal" resultType="int">
+        select Count(*) from tbl_tran;
+    </select>
+
+    <select id="getCharts" resultType="map">
+        select count(*) as value,stage as name from tbl_tran group by stage;
+    </select>
 </mapper>
 
 

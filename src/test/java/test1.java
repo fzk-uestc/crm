@@ -45,7 +45,16 @@ public class test1 {
         System.out.println("classLoaderParentParent=" + classLoaderParentParent);
         System.out.println(ClassLoader.getSystemClassLoader());
 
-
-
+    }
+    @Test
+    public void test4() throws NoSuchFieldException, IllegalAccessException {
+        Class cache=Integer.class.getDeclaredClasses()[0];
+        Field mycache = cache.getDeclaredField("cache");
+        mycache.setAccessible(true);
+        Integer[] newCache= (Integer[])mycache.get(cache);
+        newCache[132]=newCache[133];
+        int a=2;
+        int b=a+a;
+        System.out.printf("%d + %d = %d",a,a,b);
     }
 }

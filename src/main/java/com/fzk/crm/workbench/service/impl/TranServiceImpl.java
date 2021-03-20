@@ -2,12 +2,12 @@ package com.fzk.crm.workbench.service.impl;
 
 import com.fzk.crm.utils.SqlSessionUtil;
 import com.fzk.crm.utils.UUIDUtil;
+import com.fzk.crm.vo.PaginationVO;
 import com.fzk.crm.workbench.dao.*;
 import com.fzk.crm.workbench.domain.*;
 import com.fzk.crm.workbench.service.ITranService;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author fzkstart
@@ -103,5 +103,29 @@ public class TranServiceImpl implements ITranService {
         tranHistory.setMoney(tran.getMoney());
         flag = (1 == tranHistoryDao.saveTranHistory(tranHistory)) && flag;
         return flag;
+    }
+
+    @Override
+    public PaginationVO<Tran> pageList(Map<String, Object> map) {
+        int total=tranDao.getTotalByCondition(map);
+        List<Tran> dataList=tranDao.getTranListByCondition(map);
+        PaginationVO<Tran> vo = new PaginationVO<>();
+        vo.setTotal(total);
+        vo.setDataList(dataList);
+        return vo;
+    }
+
+    @Override
+    public Map<String, Object> getCharts() {
+        //取得total
+        int total=tranDao.getTotal();
+        //取得dataList
+        List<Map<String,Object>> dataList=tranDao.getCharts();
+        //将total和dataList保存到map
+        Map<String,Object> map=new HashMap<>();
+        map.put("total",total);
+        map.put("dataList",dataList);
+        //返回map
+        return map;
     }
 }

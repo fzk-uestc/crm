@@ -206,11 +206,11 @@
                             %>
                         };
                         $("#possibility").html(map[stage]);
-                        $("#editBy").html(data.tran.editBy+" ");
-                        $("#editTime").html(data.tran.editTime+" ");
+                        $("#editBy").html(data.tran.editBy + " ");
+                        $("#editTime").html(data.tran.editTime + " ");
 
                         //(2)将所有阶段图标重新判断，重新赋予样式和颜色
-                        changeIcon(stage,i);
+                        changeIcon(stage, i);
 
                         //(3)交易阶段历史列表刷新
                         showTranHistoryList();
@@ -226,75 +226,75 @@
             stage:改变的阶段，即当前阶段
             index：改变的阶段的下标，即为阶段图标span的id哦
          */
-        function changeIcon(stage,index){
-            alert(stage+";"+index);
+        function changeIcon(stage, index) {
+            alert("阶段：" + stage + ";下标：" + index + ";参数类型：" + typeof index);
             //当前阶段
-            let currentStage=stage;
+            let currentStage = stage;
             //当前阶段可能性。
-            let currentPossibility=$("#possibility").html();
+            let currentPossibility = $("#possibility").html();
             //当前阶段的下标: index
 
             //前面正常阶段和后面丢失阶段的分界点下标
-            let point ="<%=point%>";
+            let point = "<%=point%>";
 
             //如果当前阶段的可能性为0 前7个都是黑圈，后两个一个红x，一个黑x
-            if(currentPossibility=="0"){
+            if (currentPossibility == "0") {
                 //遍历分界点之前
-                for(let i=0;i<point;i++){
+                for (let i = 0; i < point; i++) {
                     //黑圈
                     //移除原有样式并添加新样式
-                    $("#"+i).removeClass().addClass("glyphicon glyphicon-record mystage");
+                    $("#" + i).removeClass().addClass("glyphicon glyphicon-record mystage");
                     //为新样式赋予颜色
-                    $("#"+i).css("color","#000000");
+                    $("#" + i).css("color", "#000000");
                 }
                 //遍历分界点之后的
-                for(let i=point;i<<%=stageList.size()%>;i++){
-                    if(i==index){
+                for (let i = point; i <<%=stageList.size()%>; i++) {
+                    if (i == index) {
                         //红x
                         //移除原有样式并添加新样式
-                        $("#"+i).removeClass().addClass("glyphicon glyphicon-remove mystage");
+                        $("#" + i).removeClass().addClass("glyphicon glyphicon-remove mystage");
                         //为新样式赋予颜色
-                        $("#"+i).css("color","#FF0000");
-                    }else{
+                        $("#" + i).css("color", "#FF0000");
+                    } else {
                         //黑x
                         //移除原有样式并添加新样式
-                        $("#"+i).removeClass().addClass("glyphicon glyphicon-remove mystage");
+                        $("#" + i).removeClass().addClass("glyphicon glyphicon-remove mystage");
                         //为新样式赋予颜色
-                        $("#"+i).css("color","#000000");
+                        $("#" + i).css("color", "#000000");
                     }
                 }
             }
             //当前阶段可能性不为0， 前7个：一些绿圈，一个绿色标记，一些黑圈，后两个都为黑x
-            else{
+            else {
                 //遍历分界点之前
-                for(let i=0;i<point;i++){
-                    if(i<index){
+                for (let i = 0; i < point; i++) {
+                    if (i < index) {
                         //绿圈
                         //移除原有样式并添加新样式
-                        $("#"+i).removeClass().addClass("glyphicon glyphicon-ok-circle mystage");
+                        $("#" + i).removeClass().addClass("glyphicon glyphicon-ok-circle mystage");
                         //为新样式赋予颜色
-                        $("#"+i).css("color","#90F790");
-                    }else if(i==index){
+                        $("#" + i).css("color", "#90F790");
+                    } else if (i == index) {
                         //绿色标记
                         //移除原有样式并添加新样式
-                        $("#"+i).removeClass().addClass("glyphicon glyphicon-map-marker mystage");
+                        $("#" + i).removeClass().addClass("glyphicon glyphicon-map-marker mystage");
                         //为新样式赋予颜色
-                        $("#"+i).css("color","#90F790");
-                    }else{
+                        $("#" + i).css("color", "#90F790");
+                    } else {
                         //黑圈
                         //移除原有样式并添加新样式
-                        $("#"+i).removeClass().addClass("glyphicon glyphicon-record mystage");
+                        $("#" + i).removeClass().addClass("glyphicon glyphicon-record mystage");
                         //为新样式赋予颜色
-                        $("#"+i).css("color","#000000");
+                        $("#" + i).css("color", "#000000");
                     }
                 }
                 //遍历分界点之后的
-                for(let i=point;i<<%=stageList.size()%>;i++){
+                for (let i = point; i <<%=stageList.size()%>; i++) {
                     //黑x
                     //移除原有样式并添加新样式
-                    $("#"+i).removeClass().addClass("glyphicon glyphicon-remove mystage");
+                    $("#" + i).removeClass().addClass("glyphicon glyphicon-remove mystage");
                     //为新样式赋予颜色
-                    $("#"+i).css("color","#000000");
+                    $("#" + i).css("color", "#000000");
                 }
             }
         }
@@ -493,15 +493,16 @@
     </div>
     <div style="position: relative; left: 40px; height: 30px; top: 30px;">
         <div style="width: 300px; color: gray;">类型</div>
-        <div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>${tran.type}</b></div>
+        <div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>${tran.type}&nbsp;</b></div>
         <div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">可能性</div>
-        <div style="width: 300px;position: relative; left: 650px; top: -60px;"><b id="possibility">${possibility}&nbsp;</b></div>
+        <div style="width: 300px;position: relative; left: 650px; top: -60px;"><b
+                id="possibility">${possibility}&nbsp;</b></div>
         <div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
         <div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
     </div>
     <div style="position: relative; left: 40px; height: 30px; top: 40px;">
         <div style="width: 300px; color: gray;">来源</div>
-        <div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>${tran.source}</b></div>
+        <div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>${tran.source}&nbsp;</b></div>
         <div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">市场活动源</div>
         <div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>${tran.activityId}&nbsp;</b></div>
         <div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
@@ -509,7 +510,7 @@
     </div>
     <div style="position: relative; left: 40px; height: 30px; top: 50px;">
         <div style="width: 300px; color: gray;">联系人名称</div>
-        <div style="width: 500px;position: relative; left: 200px; top: -20px;"><b>${tran.contactsId}</b></div>
+        <div style="width: 500px;position: relative; left: 200px; top: -20px;"><b>${tran.contactsId}&nbsp;</b></div>
         <div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
     </div>
     <div style="position: relative; left: 40px; height: 30px; top: 60px;">
@@ -520,7 +521,8 @@
     </div>
     <div style="position: relative; left: 40px; height: 30px; top: 70px;">
         <div style="width: 300px; color: gray;">修改者</div>
-        <div style="width: 500px;position: relative; left: 200px; top: -20px;"><b id="editBy">${tran.editBy}&nbsp;&nbsp;</b><small
+        <div style="width: 500px;position: relative; left: 200px; top: -20px;"><b
+                id="editBy">${tran.editBy}&nbsp;&nbsp;</b><small
                 style="font-size: 10px; color: gray;" id="editTime">${tran.editTime}</small></div>
         <div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
     </div>

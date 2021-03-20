@@ -320,7 +320,7 @@
             //为每一个单选复选框动态绑定事件，因为是动态生成的，用on绑定
             //对于动态生成的元素，不能直接绑定，需要绑定其祖先元素，再用选择器选到子元素
             $("#clueBody").on("click","input[name='check']",function (){
-                $("#checkAll").prop("checked",$("input[name='check']:checked").length===$("input[name]").length);
+                $("#checkAll").prop("checked",$("input[name='check']:checked").length===$("input[name='check']").length);
             });
         });
 

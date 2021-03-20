@@ -7,6 +7,7 @@ import com.fzk.crm.utils.DateTimeUtil;
 import com.fzk.crm.utils.PrintJson;
 import com.fzk.crm.utils.ServiceFactory;
 import com.fzk.crm.utils.UUIDUtil;
+import com.fzk.crm.vo.PaginationVO;
 import com.fzk.crm.workbench.dao.TranHistoryDao;
 import com.fzk.crm.workbench.domain.Activity;
 import com.fzk.crm.workbench.domain.Contacts;
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,10 @@ public class TranController extends HttpServlet {
             getTranHistoryListByTranId(request, response);
         } else if ("/workbench/transaction/changeStage.do".equals(path)) {
             changeStage(request, response);
+        } else if ("/workbench/transaction/pageList.do".equals(path)) {
+            pageList(request, response);
+        } else if ("/workbench/transaction/getCharts.do".equals(path)) {
+            getCharts(request, response);
         }
 
     }
@@ -134,50 +140,50 @@ public class TranController extends HttpServlet {
         tran.setNextContactTime(nextContactTime);
 
         //调用业务层
-        ITranService tranService=(ITranService)ServiceFactory.getService(new TranServiceImpl());
-        boolean flag=tranService.saveTran(tran,customerName);
-        if(flag){
+        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+        boolean flag = tranService.saveTran(tran, customerName);
+        if (flag) {
             //重定向到index.jsp
-            response.sendRedirect(request.getContextPath()+"/workbench/transaction/index.jsp");
+            response.sendRedirect(request.getContextPath() + "/workbench/transaction/index.jsp");
         }
     }
 
     private void detail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //取出前端参数tranId
-        String tranId=request.getParameter("tranId");
+        String tranId = request.getParameter("tranId");
         //调用业务层
-        ITranService tranService=(ITranService)ServiceFactory.getService(new TranServiceImpl());
-        Tran tran=tranService.detail(tranId);
+        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+        Tran tran = tranService.detail(tranId);
 
         /*
         处理可能性possibility
         阶段stage
          */
-        String stage=tran.getStage();
-        Map<String,String> stageMap =(Map<String,String>)request.getServletContext().getAttribute("stageMap");
-        String possibility=stageMap.get(stage);
-        request.setAttribute("possibility",possibility);
+        String stage = tran.getStage();
+        Map<String, String> stageMap = (Map<String, String>) request.getServletContext().getAttribute("stageMap");
+        String possibility = stageMap.get(stage);
+        request.setAttribute("possibility", possibility);
         //将tran保存到detail.jsp的request域对象
-        request.setAttribute("tran",tran);
+        request.setAttribute("tran", tran);
         //请求转发
         request.getRequestDispatcher("/workbench/transaction/detail.jsp").forward(request, response);
     }
 
     private void getTranHistoryListByTranId(HttpServletRequest request, HttpServletResponse response) {
-        String tranId=request.getParameter("tranId");
+        String tranId = request.getParameter("tranId");
         //调用业务层
-        ITranService tranService=(ITranService)ServiceFactory.getService(new TranServiceImpl());
-        List<TranHistory> tranHistoryList=tranService.getTranHistoryListByTranId(tranId);
+        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+        List<TranHistory> tranHistoryList = tranService.getTranHistoryListByTranId(tranId);
         //返回json
-        PrintJson.printJsonObj(response,tranHistoryList);
+        PrintJson.printJsonObj(response, tranHistoryList);
     }
 
     private void changeStage(HttpServletRequest request, HttpServletResponse response) {
         //取出前端参数,tranId,stage,money,expectedDate
-        String tranId =request.getParameter("tranId");
-        String stage =request.getParameter("stage");
-        String money =request.getParameter("money");
-        String expectedDate =request.getParameter("expectedDate");
+        String tranId = request.getParameter("tranId");
+        String stage = request.getParameter("stage");
+        String money = request.getParameter("money");
+        String expectedDate = request.getParameter("expectedDate");
         System.out.println(tranId);
         //修改人和修改时间
         String editBy = ((User) request.getSession().getAttribute("user")).getName();
@@ -192,12 +198,66 @@ public class TranController extends HttpServlet {
         tran.setEditTime(editTime);
 
         //调用业务层
-        ITranService tranService=(ITranService)ServiceFactory.getService(new TranServiceImpl());
-        boolean flag=tranService.changeStage(tran);
+        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+        boolean flag = tranService.changeStage(tran);
 
-        Map<String,Object> map=new HashMap<>();
-        map.put("success",flag);
-        map.put("tran",tran);
+        Map<String, Object> map = new HashMap<>();
+        map.put("success", flag);
+        map.put("tran", tran);
+        //返回json
+        PrintJson.printJsonObj(response, map);
+    }
+
+    private void pageList(HttpServletRequest request, HttpServletResponse response) {
+        //取出前端参数
+        String pageNoStr = request.getParameter("pageNo");
+        String pageSizeStr = request.getParameter("pageSize");
+        String owner = request.getParameter("owner");
+        String name = request.getParameter("name");
+        String customerName = request.getParameter("customerName");
+        String stage = request.getParameter("stage");
+        String type = request.getParameter("transactionType");
+        String source = request.getParameter("source");
+        String contactsName = request.getParameter("contactsName");
+
+        int pageNo = Integer.valueOf(pageNoStr, 10);//展示的页数,转换为10进制
+        int pageSize = Integer.valueOf(pageSizeStr, 10);//每页的列表条目数量
+        //计算分页查询起始索引
+        int index = (pageNo - 1) * pageSize;
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("index", index);
+        map.put("pageSize", pageSize);
+        map.put("owner", owner);
+        map.put("name", name);
+        map.put("customerName", customerName);
+        map.put("stage", stage);
+        map.put("type", type);
+        map.put("source", source);
+        map.put("contactsName", contactsName);
+        System.out.println(map);
+
+
+        //调用业务层
+        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+        /*
+        data
+            {"total":100,"dataList":[{线索1},{2},{3}...]}
+
+            PaginationVO
+         */
+        PaginationVO<Tran> vo = tranService.pageList(map);
+        PrintJson.printJsonObj(response, vo);
+    }
+
+    private void getCharts(HttpServletRequest request, HttpServletResponse response) {
+        /*
+        data
+            {"total":10,"dataList":[{value: 60, name: '访问'},{},...]}
+        */
+        //调用业务层
+        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+        Map<String,Object> map=tranService.getCharts();
         //返回json
         PrintJson.printJsonObj(response,map);
     }
