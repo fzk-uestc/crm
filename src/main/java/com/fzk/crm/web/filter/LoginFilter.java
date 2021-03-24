@@ -29,15 +29,16 @@ public class LoginFilter implements Filter {
         System.out.println(servletPath);
         if ("/login.jsp".equals(servletPath) || "/settings/user/login.do".equals(servletPath)) {
             //登录页面，放行
+            System.out.println("放行！");
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             Object user = request.getSession().getAttribute("user");
             if (user == null) {
                 //说明没有登录过，重定向到登录页
-            /*
-                为什么这里使用重定向？
+                /*为什么这里使用重定向？
                     转发之后，路劲停留在老路径上，而不是跳转之后的新资源路劲
-             */
+
+                */
                 response.sendRedirect(request.getContextPath() + "/login.jsp");
             } else {
                 //说明登录过，放行

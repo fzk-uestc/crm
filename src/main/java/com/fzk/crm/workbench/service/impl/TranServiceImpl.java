@@ -6,6 +6,8 @@ import com.fzk.crm.vo.PaginationVO;
 import com.fzk.crm.workbench.dao.*;
 import com.fzk.crm.workbench.domain.*;
 import com.fzk.crm.workbench.service.ITranService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
@@ -13,16 +15,30 @@ import java.util.*;
  * @author fzkstart
  * @create 2021-03-14 12:35
  */
+@Service(value="tranService")
 public class TranServiceImpl implements ITranService {
     //交易dao
-    private TranDao tranDao = SqlSessionUtil.getSqlSession().getMapper(TranDao.class);
-    private TranHistoryDao tranHistoryDao = SqlSessionUtil.getSqlSession().getMapper(TranHistoryDao.class);
+   /* private TranDao tranDao = SqlSessionUtil.getSqlSession().getMapper(TranDao.class);
+    private TranHistoryDao tranHistoryDao = SqlSessionUtil.getSqlSession().getMapper(TranHistoryDao.class);*/
+    @Autowired
+    private TranDao tranDao;
+    @Autowired
+    private TranHistoryDao tranHistoryDao;
+
     //市场活动dao
-    private ActivityDao activityDao = SqlSessionUtil.getSqlSession().getMapper(ActivityDao.class);
+    //private ActivityDao activityDao = SqlSessionUtil.getSqlSession().getMapper(ActivityDao.class);
+    @Autowired
+    private ActivityDao activityDao;
+
     //联系人dao
-    private ContactsDao contactsDao = SqlSessionUtil.getSqlSession().getMapper(ContactsDao.class);
+    //private ContactsDao contactsDao = SqlSessionUtil.getSqlSession().getMapper(ContactsDao.class);
+    @Autowired
+    private ContactsDao contactsDao;
+
     //客户dao
-    private CustomerDao customerDao = SqlSessionUtil.getSqlSession().getMapper(CustomerDao.class);
+    //private CustomerDao customerDao = SqlSessionUtil.getSqlSession().getMapper(CustomerDao.class);
+    @Autowired
+    private CustomerDao customerDao;
 
     @Override
     public List<Activity> getActivityListByName(String activityName) {

@@ -132,6 +132,16 @@
         on a.owner=u.id
         where a.name like '%' #{activityName} '%';
     </select>
+
+    <select id="getTotal" resultType="int">
+        select count(*) from tbl_activity;
+    </select>
+    <select id="getCharts" resultType="map">
+        select count(*) as value,u.name as name
+        from tbl_activity a
+        inner join tbl_user u on a.owner=u.id
+        group by a.owner;
+    </select>
 </mapper>
 
 

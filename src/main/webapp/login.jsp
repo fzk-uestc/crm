@@ -70,6 +70,7 @@
     </script>
 </head>
 <body>
+
 <div style="position: absolute; top: 0px; left: 0px; width: 60%;">
     <img src="image/IMG_7114.JPG" style="width: 100%; height: 90%; position: relative; top: 50px;">
 </div>
@@ -103,5 +104,7 @@
         </form>
     </div>
 </div>
+
+
 </body>
 </html>

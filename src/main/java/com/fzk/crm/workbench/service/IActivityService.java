@@ -31,5 +31,7 @@ public interface IActivityService {
     boolean saveRemark(ActivityRemark activityRemark);
 
     boolean updateRemark(ActivityRemark activityRemark);
+
+    Map<String, Object> getCharts();
 }
 

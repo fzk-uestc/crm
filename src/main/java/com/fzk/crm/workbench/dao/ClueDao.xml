@@ -153,6 +153,13 @@
         </where>
     </delete>
 
+    <select id="getTotal" resultType="int">
+        select count(*) from tbl_clue;
+    </select>
+
+    <select id="getCharts" resultType="map">
+        select count(*) as value,source as name from tbl_clue group by source;
+    </select>
 </mapper>
 
 

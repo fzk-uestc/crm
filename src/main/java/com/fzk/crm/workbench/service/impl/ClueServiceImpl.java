@@ -9,7 +9,10 @@ import com.fzk.crm.vo.PaginationVO;
 import com.fzk.crm.workbench.dao.*;
 import com.fzk.crm.workbench.domain.*;
 import com.fzk.crm.workbench.service.IClueService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,27 +21,40 @@ import java.util.Map;
  * @author fzkstart
  * @create 2021-03-07 11:35
  */
+@Service(value = "clueService")
 public class ClueServiceImpl implements IClueService {
-    private UserDao userDao = SqlSessionUtil.getSqlSession().getMapper(UserDao.class);
-    private ActivityDao activityDao = SqlSessionUtil.getSqlSession().getMapper(ActivityDao.class);
+    @Autowired
+    private UserDao userDao;
+    @Autowired
+    private ActivityDao activityDao;
 
     //线索相关表
-    private ClueDao clueDao = SqlSessionUtil.getSqlSession().getMapper(ClueDao.class);
-    private ClueRemarkDao clueRemarkDao = SqlSessionUtil.getSqlSession().getMapper(ClueRemarkDao.class);
-    private ClueActivityRelationDao clueActivityRelationDao = SqlSessionUtil.getSqlSession().getMapper(ClueActivityRelationDao.class);
+    @Autowired
+    private ClueDao clueDao;
+    @Autowired
+    private ClueRemarkDao clueRemarkDao;
+    @Autowired
+    private ClueActivityRelationDao clueActivityRelationDao;
 
     //客户相关表
-    private CustomerDao customerDao = SqlSessionUtil.getSqlSession().getMapper(CustomerDao.class);
-    private CustomerRemarkDao customerRemarkDao = SqlSessionUtil.getSqlSession().getMapper(CustomerRemarkDao.class);
+    @Autowired
+    private CustomerDao customerDao;
+    @Autowired
+    private CustomerRemarkDao customerRemarkDao;
 
     //联系人相关表
-    private ContactsDao contactsDao = SqlSessionUtil.getSqlSession().getMapper(ContactsDao.class);
-    private ContactsRemarkDao contactsRemarkDao = SqlSessionUtil.getSqlSession().getMapper(ContactsRemarkDao.class);
-    private ContactsActivityRelationDao contactsActivityRelationDao = SqlSessionUtil.getSqlSession().getMapper(ContactsActivityRelationDao.class);
+    @Autowired
+    private ContactsDao contactsDao;
+    @Autowired
+    private ContactsRemarkDao contactsRemarkDao;
+    @Autowired
+    private ContactsActivityRelationDao contactsActivityRelationDao;
 
     //交易相关表
-    private TranDao tranDao = SqlSessionUtil.getSqlSession().getMapper(TranDao.class);
-    private TranHistoryDao tranHistoryDao = SqlSessionUtil.getSqlSession().getMapper(TranHistoryDao.class);
+    @Autowired
+    private TranDao tranDao;
+    @Autowired
+    private TranHistoryDao tranHistoryDao;
 
     @Override
     public boolean saveClue(Clue clue) {
@@ -202,7 +218,7 @@ public class ClueServiceImpl implements IClueService {
 
         //(4) 线索备注转换到客户备注以及联系人备注
         List<ClueRemark> clueRemarkList = clueRemarkDao.getRemarkListByClueId(clueId);
-        for (ClueRemark clueRemark:clueRemarkList){
+        for (ClueRemark clueRemark : clueRemarkList) {
             //取出每一条线索的备注信息
             String noteContent = clueRemark.getNoteContent();
             //客户备注
@@ -213,7 +229,7 @@ public class ClueServiceImpl implements IClueService {
             customerRemark.setNoteContent(noteContent);
             customerRemark.setCustomerId(customer.getId());
             customerRemark.setEditFlag("0");
-            flag=(1==customerRemarkDao.saveRemark(customerRemark))&&flag;
+            flag = (1 == customerRemarkDao.saveRemark(customerRemark)) && flag;
             //联系人备注
             ContactsRemark contactsRemark = new ContactsRemark();
             contactsRemark.setId(UUIDUtil.getUUID());
@@ -222,21 +238,21 @@ public class ClueServiceImpl implements IClueService {
             contactsRemark.setCreateBy(createBy);
             contactsRemark.setEditFlag("0");
             contactsRemark.setContactsId(contacts.getId());
-            flag=(1==contactsRemarkDao.saveRemark(contactsRemark))&&flag;
+            flag = (1 == contactsRemarkDao.saveRemark(contactsRemark)) && flag;
         }
 
         //(5) “线索和市场活动”的关系转换到“联系人和市场活动”的关系
-        List<ClueActivityRelation> clueActivityRelationList=clueActivityRelationDao.getRelationListByClueId(clueId);
-        for(ClueActivityRelation clueActivityRelation:clueActivityRelationList){
+        List<ClueActivityRelation> clueActivityRelationList = clueActivityRelationDao.getRelationListByClueId(clueId);
+        for (ClueActivityRelation clueActivityRelation : clueActivityRelationList) {
             ContactsActivityRelation contactsActivityRelation = new ContactsActivityRelation();
             contactsActivityRelation.setId(UUIDUtil.getUUID());
             contactsActivityRelation.setContactsId(contacts.getId());
             contactsActivityRelation.setActivityId(clueActivityRelation.getActivityId());
-            flag=(1==contactsActivityRelationDao.bind(contactsActivityRelation))&&flag;
+            flag = (1 == contactsActivityRelationDao.bind(contactsActivityRelation)) && flag;
         }
 
         //(6) 如果有创建交易需求，创建一条交易
-        if(tran!=null){
+        if (tran != null) {
             /*
             tran对象在controller中已经封装了如下信息：
             id,createTime,createBy,money,name,expectedDate,stage,activityId
@@ -250,7 +266,7 @@ public class ClueServiceImpl implements IClueService {
             tran.setOwner(clue.getOwner());
             tran.setNextContactTime(clue.getNextContactTime());
             tran.setDescription(clue.getDescription());
-            flag=(1==tranDao.saveTran(tran))&&flag;
+            flag = (1 == tranDao.saveTran(tran)) && flag;
 
 
             //(7) 如果创建了交易，则创建一条该交易下的交易历史
@@ -262,7 +278,7 @@ public class ClueServiceImpl implements IClueService {
             tranHistory.setStage(tran.getStage());
             tranHistory.setMoney(tran.getMoney());
             tranHistory.setExpectedDate(tran.getExpectedDate());
-            flag=(1==tranHistoryDao.saveTranHistory(tranHistory))&&flag;
+            flag = (1 == tranHistoryDao.saveTranHistory(tranHistory)) && flag;
         }
         /*
         (8) 删除线索备注
@@ -270,7 +286,26 @@ public class ClueServiceImpl implements IClueService {
         (10) 删除线索
         这里调用之前写过的一个删除clue的service方法，里面包含有级联删除clueRemark和clue_activity_relation
         */
-        flag=deleteClueByIds(new String[]{clueId})&&flag;
+        flag = deleteClueByIds(new String[]{clueId}) && flag;
         return flag;
+    }
+
+    @Override
+    public Map<String, Object> getCharts() {
+        /*
+        data
+            {"total":10,"dataList":[{value: 60, name: '访问'},{},...]}
+        */
+        int total = clueDao.getTotal();
+        List<Map<String, Object>> dataList = clueDao.getCharts();
+        Map<String, Object> map = new HashMap<>();
+        map.put("total", total);
+        map.put("dataList", dataList);
+        return map;
+    }
+
+    @Override
+    public List<ClueRemark> getRemarkListByClueId(String clueId) {
+        return clueRemarkDao.getRemarkListByClueId(clueId);
     }
 }

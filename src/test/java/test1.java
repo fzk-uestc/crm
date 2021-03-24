@@ -7,6 +7,8 @@ import com.fzk.crm.utils.MD5Util;
 import com.fzk.crm.utils.ServiceFactory;
 import com.fzk.crm.workbench.domain.Activity;
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -57,4 +59,5 @@ public class test1 {
         int b=a+a;
         System.out.printf("%d + %d = %d",a,a,b);
     }
+
 }

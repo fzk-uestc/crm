@@ -10,6 +10,8 @@ import com.fzk.crm.workbench.domain.Activity;
 import com.fzk.crm.workbench.domain.ActivityRemark;
 import com.fzk.crm.workbench.service.IActivityService;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,10 +21,14 @@ import java.util.Map;
  * @author fzkstart
  * @create 2021-02-25 12:59
  */
+@Service(value="activityService")
 public class ActivityServiceImpl implements IActivityService {
-    private ActivityDao activityDao = SqlSessionUtil.getSqlSession().getMapper(ActivityDao.class);
-    private ActivityRemarkDao activityRemarkDao = SqlSessionUtil.getSqlSession().getMapper(ActivityRemarkDao.class);
-    private UserDao userDao= SqlSessionUtil.getSqlSession().getMapper(UserDao.class);
+    @Autowired
+    private ActivityDao activityDao;
+    @Autowired
+    private ActivityRemarkDao activityRemarkDao;
+    @Autowired
+    private UserDao userDao;
 
     @Override
     public boolean saveActivity(Activity activity) {
@@ -115,5 +121,23 @@ public class ActivityServiceImpl implements IActivityService {
     public boolean updateRemark(ActivityRemark activityRemark) {
         int count=activityRemarkDao.updateRemark(activityRemark);
         return count==1;
+    }
+
+    @Override
+    public Map<String, Object> getCharts() {
+        /*
+        data
+        {"total":10,"dataList":[{value: 60, name: '访问'},{},...]}
+        */
+        //取得total
+        int total=activityDao.getTotal();
+        //取得dataList
+        List<Map<String,Object>> dataList=activityDao.getCharts();
+        //将total和dataList保存到map
+        Map<String,Object> map=new HashMap<>();
+        map.put("total",total);
+        map.put("dataList",dataList);
+        //返回map
+        return map;
     }
 }

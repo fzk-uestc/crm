@@ -6,6 +6,11 @@ import com.fzk.crm.settings.service.impl.UserServiceImpl;
 import com.fzk.crm.utils.MD5Util;
 import com.fzk.crm.utils.PrintJson;
 import com.fzk.crm.utils.ServiceFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -18,19 +23,14 @@ import java.util.HashMap;
  * @author fzkstart
  * @create 2021-02-22 13:11
  */
-public class UserController extends HttpServlet {
-    @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+@Controller(value = "userController")
+@RequestMapping(path = "/settings/user")
+public class UserController{
+    @Autowired
+    private IUserService userService;
 
-        System.out.println("进入到用户控制器");
-        String path = request.getServletPath();
-
-        if ("/settings/user/login.do".equals(path)) {
-            login(request, response);
-        }
-    }
-
-    private void login(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping("/login.do")
+    public void login(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到验证登录方法");
 
         String loginAct = request.getParameter("loginAct");
@@ -45,14 +45,9 @@ public class UserController extends HttpServlet {
         String ip = request.getRemoteAddr();
         System.out.println("ip地址为：--------->" + ip);
 
-        //调用业务层，代理对象
-        IUserService loginService =
-                (IUserService) ServiceFactory.
-                        getService(new UserServiceImpl());
-
         //抛异常形式验证是否登录成功
         try {
-            User user = loginService.login(loginAct, loginPwdMD5, ip);
+            User user = userService.login(loginAct, loginPwdMD5, ip);
             request.getSession().setAttribute("user", user);
 
             //执行到这里，代表登录成功

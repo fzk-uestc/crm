@@ -240,20 +240,26 @@
                                     <font color="gray">线索</font> <font color="gray">-</font> <b>李四先生-动力节点</b> <small style="color: gray;">
                                     2017-01-22 10:10:10 由zhangsan</small>
                                     <div style="position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;">
-                                        <a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-edit"
-                                                                                           style="font-size: 20px; color: #E6E6E6;"></span></a>
+                                        <a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-edit" style="font-size: 20px; color: #E6E6E6;"></span></a>
                                         &nbsp;&nbsp;&nbsp;&nbsp;
-                                        <a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-remove"
-                                                                                           style="font-size: 20px; color: #E6E6E6;"></span></a>
+                                        <a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #E6E6E6;"></span></a>
                                     </div>
                                 </div>
                         </div>*/
                         html+='<div id="'+n.id+'" class="remarkDiv" style="height: 60px;">';
                         html+='<img title="zhangsan" src="image/user-thumbnail.png" style="width: 30px; height:30px;">';
                         html+='<div style="position: relative; top: -40px; left: 40px;">';
-                        html+='<h5>'+n.name+'</h5>';
-                        html+='';
+                        html+='<h5>'+n.noteContent+'</h5>';
+                        html+='<font color="gray">线索</font> <font color="gray">-</font> <b>${requestScope.clue.fullname}-${clue.company}</b> <small style="color: gray;"> '+(n.editFlag == "0" ? n.createTime : n.editTime) + ' 由 ' + (n.editFlag == "0" ? n.createBy + " 创建" : n.editBy + " 修改") +'</small>';
+                        html+='<div style="position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;">';
+                        html+='<a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-edit" style="font-size: 20px; color: #E6E6E6;"></span></a>';
+                        html+='&nbsp;&nbsp;&nbsp;&nbsp;';
+                        html+='<a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #E6E6E6;"></span></a>';
+                        html+='</div></div></div>';
                     });
+                    //因为要加入的div中有内容，所以可以选择新建空的div，再往里面加html
+                    //也可以使用jQuery的外部插入before()
+                    $("#remarkDiv").before(html);
                 }
             });
         }

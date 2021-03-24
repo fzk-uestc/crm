@@ -6,6 +6,8 @@ import com.fzk.crm.settings.domain.User;
 import com.fzk.crm.settings.service.IUserService;
 import com.fzk.crm.utils.DateTimeUtil;
 import com.fzk.crm.utils.SqlSessionUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,9 +17,10 @@ import java.util.Map;
  * @author fzkstart
  * @create 2021-02-22 13:06
  */
+@Service(value = "userService")
 public class UserServiceImpl implements IUserService {
-    private UserDao userDao = SqlSessionUtil.getSqlSession().
-            getMapper(UserDao.class);
+    @Autowired
+    private UserDao userDao;
 
     public User login(String loginAct, String loginPwd, String ip) throws LoginException {
 
@@ -30,7 +33,7 @@ public class UserServiceImpl implements IUserService {
         User user = userDao.login(map);
 
         if (user == null) {
-            throw new LoginException("账户密码错误");
+            throw new LoginException("123账户密码错误");
         }
         //账户密码正确，继续向下验证其他三项信息
         //验证失效时间expireTime

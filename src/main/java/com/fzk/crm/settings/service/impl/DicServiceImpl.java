@@ -6,6 +6,8 @@ import com.fzk.crm.settings.domain.DicType;
 import com.fzk.crm.settings.domain.DicValue;
 import com.fzk.crm.settings.service.IDicService;
 import com.fzk.crm.utils.SqlSessionUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;

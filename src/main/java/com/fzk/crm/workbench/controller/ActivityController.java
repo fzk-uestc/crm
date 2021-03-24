@@ -9,6 +9,10 @@ import com.fzk.crm.workbench.domain.Activity;
 import com.fzk.crm.workbench.domain.ActivityRemark;
 import com.fzk.crm.workbench.service.IActivityService;
 import com.fzk.crm.workbench.service.impl.ActivityServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,44 +28,21 @@ import java.util.Map;
  * @author fzkstart
  * @create 2021-02-22 13:11
  */
-public class ActivityController extends HttpServlet {
-    @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+@Controller(value = "activityController")
+@RequestMapping(path = "/workbench/activity")
+public class ActivityController {
+    @Autowired
+    private IUserService userService;
+    @Autowired
+    private IActivityService activityService;
 
-        System.out.println("进入到市场活动控制器");
-        String path = request.getServletPath();
-
-        if ("/workbench/activity/getUserList.do".equals(path)) {
-            getUserList(request, response);
-        } else if ("/workbench/activity/saveActivity.do".equals(path)) {
-            saveActivity(request, response);
-        } else if ("/workbench/activity/pageList.do".equals(path)) {
-            pageList(request, response);
-        } else if ("/workbench/activity/deleteActivity.do".equals(path)) {
-            deleteActivity(request, response);
-        } else if ("/workbench/activity/getUserListAndActivity.do".equals(path)) {
-            getUserListAndActivity(request, response);
-        } else if ("/workbench/activity/updateActivity.do".equals(path)) {
-            updateActivity(request, response);
-        } else if ("/workbench/activity/detail.do".equals(path)) {
-            detail(request, response);
-        } else if ("/workbench/activity/getRemarkListByActivityId.do".equals(path)) {
-            getRemarkListByActivityId(request, response);
-        } else if ("/workbench/activity/deleteRemark.do".equals(path)) {
-            deleteRemark(request, response);
-        } else if ("/workbench/activity/saveRemark.do".equals(path)) {
-            saveRemark(request, response);
-        } else if ("/workbench/activity/updateRemark.do".equals(path)) {
-            updateRemark(request, response);
-        }
-    }
-
+    @RequestMapping(path = "/getUserList.do")
     private void getUserList(HttpServletRequest request, HttpServletResponse response) {
-        IUserService userService = (IUserService) ServiceFactory.getService(new UserServiceImpl());
         List<User> uList = userService.getUserList();
         PrintJson.printJsonObj(response, uList);
     }
 
+    @RequestMapping(path = "/saveActivity.do")
     private void saveActivity(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到controller保存市场活动saveActivity()...");
 
@@ -90,7 +71,6 @@ public class ActivityController extends HttpServlet {
 
         System.out.println(activity);
         //调用业务层
-        IActivityService activityService = (IActivityService) ServiceFactory.getService(new ActivityServiceImpl());
         boolean flag = activityService.saveActivity(activity);
 
         //返回json字符串
@@ -98,6 +78,7 @@ public class ActivityController extends HttpServlet {
 
     }
 
+    @RequestMapping(path = "/pageList.do")
     private void pageList(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到ActivityController的pageList()...");
 
@@ -123,10 +104,7 @@ public class ActivityController extends HttpServlet {
         map.put("pageSize", pageSize);
 
         System.out.println(map);
-        //调用业务层
-        IActivityService activityService =
-                (IActivityService) ServiceFactory.
-                        getService(new ActivityServiceImpl());
+
         /*
             前端要的是：市场活动信息列表
                         查询的总条数
@@ -151,6 +129,7 @@ public class ActivityController extends HttpServlet {
         PrintJson.printJsonObj(response, vo);
     }
 
+    @RequestMapping(path = "/deleteActivity.do")
     private void deleteActivity(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到ActivityController的deleteActivity()...");
 
@@ -159,10 +138,6 @@ public class ActivityController extends HttpServlet {
         for (String id : ids) {
             System.out.println(id);
         }
-        //调用业务层
-        IActivityService activityService =
-                (IActivityService) ServiceFactory.
-                        getService(new ActivityServiceImpl());
 
         boolean flag = activityService.deleteActivity(ids);
 
@@ -170,15 +145,12 @@ public class ActivityController extends HttpServlet {
         PrintJson.printJsonFlag(response, flag);
     }
 
+    @RequestMapping(path = "/getUserListAndActivity.do")
     private void getUserListAndActivity(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到ActivityController的getUserListAndActivity()...");
         //取出要修改的市场活动的id
         String activityId = request.getParameter("id");
 
-        //调用业务层
-        IActivityService activityService =
-                (IActivityService) ServiceFactory.
-                        getService(new ActivityServiceImpl());
         /*
         总结：
             controller调用service方法，前端值要什么，service返回值就是什么
@@ -192,6 +164,7 @@ public class ActivityController extends HttpServlet {
         PrintJson.printJsonObj(response, map);
     }
 
+    @RequestMapping(path = "/updateActivity.do")
     private void updateActivity(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到ActivityController的updateActivity()...");
 
@@ -220,16 +193,13 @@ public class ActivityController extends HttpServlet {
         activity.setEditTime(editTime);
         activity.setEditBy(editBy);
 
-        //调用业务层
-        IActivityService activityService =
-                (IActivityService) ServiceFactory.
-                        getService(new ActivityServiceImpl());
         boolean flag = activityService.updateActivity(activity);
 
         //返回json
         PrintJson.printJsonFlag(response, flag);
     }
 
+    @RequestMapping(path = "/detail.do")
     private void detail(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         System.out.println("进入到ActivityController的detail()...");
 
@@ -238,10 +208,7 @@ public class ActivityController extends HttpServlet {
         /*
         前端这里需要跳转页面，那么就将查询到的activity保存在request域中，请求转发
          */
-        //调用业务层
-        IActivityService activityService =
-                (IActivityService) ServiceFactory.
-                        getService(new ActivityServiceImpl());
+
         Activity activity = activityService.detail(activityId);
         System.out.println(activity);
         request.setAttribute("activity", activity);
@@ -249,6 +216,7 @@ public class ActivityController extends HttpServlet {
         request.getRequestDispatcher("/workbench/activity/detail.jsp").forward(request, response);
     }
 
+    @RequestMapping(path = "/getRemarkListByActivityId.do")
     private void getRemarkListByActivityId(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到ActivityController的getRemarkListByActivityId()...");
 
@@ -259,44 +227,38 @@ public class ActivityController extends HttpServlet {
           data
                [{remark1},{2},{3}]
         */
-        //调用业务层
-        IActivityService activityService =
-                (IActivityService) ServiceFactory.
-                        getService(new ActivityServiceImpl());
         List<ActivityRemark> list = activityService.getRemarkListByActivityId(activityId);
         //返回json
         PrintJson.printJsonObj(response, list);
     }
 
+    @RequestMapping(path = "/deleteRemark.do")
     private void deleteRemark(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到ActivityController的deleteRemark()...");
 
         //取前端参数remarkId
         String remarkId = request.getParameter("remarkId");
 
-        //调用业务层
-        IActivityService activityService =
-                (IActivityService) ServiceFactory.
-                        getService(new ActivityServiceImpl());
         boolean flag = activityService.deleteRemark(remarkId);
 
         //返回json串
         PrintJson.printJsonFlag(response, flag);
     }
 
+    @RequestMapping(path = "/saveRemark.do")
     private void saveRemark(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到ActivityController的saveRemark()...");
 
         //取出前端参数
-        String noteContent=request.getParameter("noteContent");
-        String activityId=request.getParameter("activityId");
+        String noteContent = request.getParameter("noteContent");
+        String activityId = request.getParameter("activityId");
         //备注的其他信息
         String remarkId = UUIDUtil.getUUID();
         String createTime = DateTimeUtil.getSysTime();
-        String createBy=((User)request.getSession().getAttribute("user")).getName();
-        String editFlag="0";
+        String createBy = ((User) request.getSession().getAttribute("user")).getName();
+        String editFlag = "0";
 
-        ActivityRemark activityRemark=new ActivityRemark();
+        ActivityRemark activityRemark = new ActivityRemark();
         activityRemark.setId(remarkId);
         activityRemark.setNoteContent(noteContent);
         activityRemark.setCreateBy(createBy);
@@ -304,10 +266,6 @@ public class ActivityController extends HttpServlet {
         activityRemark.setEditFlag(editFlag);
         activityRemark.setActivityId(activityId);
 
-        //调用业务层
-        IActivityService activityService =
-                (IActivityService) ServiceFactory.
-                        getService(new ActivityServiceImpl());
         boolean flag = activityService.saveRemark(activityRemark);
 
         //保存到map
@@ -315,36 +273,32 @@ public class ActivityController extends HttpServlet {
         data
             {"success":true/false,"remark":{备注}}
          */
-        Map<String,Object> map=new HashMap<>();
-        map.put("success",flag);
-        map.put("remark",activityRemark);
+        Map<String, Object> map = new HashMap<>();
+        map.put("success", flag);
+        map.put("remark", activityRemark);
         //返回json
-        PrintJson.printJsonObj(response,map);
+        PrintJson.printJsonObj(response, map);
     }
 
-
+    @RequestMapping(path = "/updateRemark.do")
     private void updateRemark(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到ActivityController的updateRemark()...");
 
         //取出前端参数remarkId和noteContent
-        String remarkId=request.getParameter("remarkId");
-        String noteContent=request.getParameter("noteContent");
+        String remarkId = request.getParameter("remarkId");
+        String noteContent = request.getParameter("noteContent");
         //修改时间、修改人、editFlag
         String editTime = DateTimeUtil.getSysTime();
-        String editBy=((User)request.getSession().getAttribute("user")).getName();
-        String editFlag="1";
+        String editBy = ((User) request.getSession().getAttribute("user")).getName();
+        String editFlag = "1";
 
-        ActivityRemark activityRemark=new ActivityRemark();
+        ActivityRemark activityRemark = new ActivityRemark();
         activityRemark.setId(remarkId);
         activityRemark.setNoteContent(noteContent);
         activityRemark.setEditTime(editTime);
         activityRemark.setEditBy(editBy);
         activityRemark.setEditFlag(editFlag);
 
-        //调用业务层
-        IActivityService activityService =
-                (IActivityService) ServiceFactory.
-                        getService(new ActivityServiceImpl());
         boolean flag = activityService.updateRemark(activityRemark);
 
         //保存到map
@@ -352,12 +306,21 @@ public class ActivityController extends HttpServlet {
         data
             {"success":true/false,"remark":{备注}}
          */
-        Map<String,Object> map=new HashMap<>();
-        map.put("success",flag);
-        map.put("remark",activityRemark);
+        Map<String, Object> map = new HashMap<>();
+        map.put("success", flag);
+        map.put("remark", activityRemark);
+        //返回json
+        PrintJson.printJsonObj(response, map);
+    }
+
+    @RequestMapping(path = "/getCharts.do")
+    public void getCharts(HttpServletRequest request, HttpServletResponse response) {
+        /*
+            data
+                {"total":10,"dataList":[{value: 60, name: '访问'},{},...]}
+        */
+        Map<String,Object> map=activityService.getCharts();
         //返回json
         PrintJson.printJsonObj(response,map);
     }
-
-
 }

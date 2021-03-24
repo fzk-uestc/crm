@@ -8,14 +8,14 @@ import com.fzk.crm.utils.PrintJson;
 import com.fzk.crm.utils.ServiceFactory;
 import com.fzk.crm.utils.UUIDUtil;
 import com.fzk.crm.vo.PaginationVO;
-import com.fzk.crm.workbench.domain.Activity;
-import com.fzk.crm.workbench.domain.ActivityRemark;
-import com.fzk.crm.workbench.domain.Clue;
-import com.fzk.crm.workbench.domain.Tran;
+import com.fzk.crm.workbench.domain.*;
 import com.fzk.crm.workbench.service.IActivityService;
 import com.fzk.crm.workbench.service.IClueService;
 import com.fzk.crm.workbench.service.impl.ActivityServiceImpl;
 import com.fzk.crm.workbench.service.impl.ClueServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -31,49 +31,19 @@ import java.util.UUID;
  * @author fzkstart
  * @create 2021-02-22 13:11
  */
+@Controller(value="clueController")
+@RequestMapping(path="/workbench/clue")
 public class ClueController extends HttpServlet {
-    @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        System.out.println("进入到线索控制器");
-        String path = request.getServletPath();
-
-        if ("/workbench/clue/getUserList.do".equals(path)) {
-            getUserList(request, response);
-        } else if ("/workbench/clue/pageList.do".equals(path)) {
-            pageList(request, response);
-        } else if ("/workbench/clue/saveClue.do".equals(path)) {
-            saveClue(request, response);
-        } else if ("/workbench/clue/detail.do".equals(path)) {
-            detail(request, response);
-        } else if ("/workbench/clue/getActivityByClueId.do".equals(path)) {
-            getActivityByClueId(request, response);
-        } else if ("/workbench/clue/unbund.do".equals(path)) {
-            unbund(request, response);
-        } else if ("/workbench/clue/getActivityListByNameAndNotRelationClueId.do".equals(path)) {
-            getActivityListByNameAndNotRelationClueId(request, response);
-        } else if ("/workbench/clue/bund.do".equals(path)) {
-            bund(request, response);
-        } else if ("/workbench/clue/getUserListAndClue.do".equals(path)) {
-            getUserListAndClue(request, response);
-        } else if ("/workbench/clue/updateClue.do".equals(path)) {
-            updateClue(request, response);
-        } else if ("/workbench/clue/deleteClueByIds.do".equals(path)) {
-            deleteClueByIds(request, response);
-        } else if ("/workbench/clue/getActivityListByName.do".equals(path)) {
-            getActivityListByName(request, response);
-        } else if ("/workbench/clue/convert.do".equals(path)) {
-            convert(request, response);
-        }
-    }
-
-
+    @Autowired
+    private IUserService userService;
+    @Autowired
+    private IClueService clueService;
+    @RequestMapping(path="/getUserList.do")
     private void getUserList(HttpServletRequest request, HttpServletResponse response) {
-        IUserService userService = (IUserService) ServiceFactory.getService(new UserServiceImpl());
         List<User> uList = userService.getUserList();
         PrintJson.printJsonObj(response, uList);
     }
-
+    @RequestMapping(path="/pageList.do")
     private void pageList(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("进入到ClueController的pageList()...");
 
@@ -105,9 +75,6 @@ public class ClueController extends HttpServlet {
         map.put("pageSize", pageSize);
         System.out.println(map);
 
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
         /*
             前端要的是：线索信息列表
                         查询的总条数
@@ -129,7 +96,7 @@ public class ClueController extends HttpServlet {
         PaginationVO<Clue> vo = clueService.pageList(map);
         PrintJson.printJsonObj(response, vo);
     }
-
+    @RequestMapping(path="/saveClue.do")
     private void saveClue(HttpServletRequest request, HttpServletResponse response) {
         //给clue生成id,createTime和createBy
         String id = UUIDUtil.getUUID();
@@ -173,21 +140,15 @@ public class ClueController extends HttpServlet {
         clue.setNextContactTime(nextContactTime);
         clue.setAddress(address);
 
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
         boolean flag = clueService.saveClue(clue);
         //返回json
         PrintJson.printJsonFlag(response, flag);
     }
-
+    @RequestMapping(path="/detail.do")
     private void detail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //取出前端参数
         String clueId = request.getParameter("id");
 
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
         Clue clue = clueService.detail(clueId);
 
         request.setAttribute("clue", clue);
@@ -195,32 +156,36 @@ public class ClueController extends HttpServlet {
         request.getRequestDispatcher("/workbench/clue/detail.jsp").forward(request, response);
     }
 
-
+    @RequestMapping(path="/getActivityByClueId.do")
     private void getActivityByClueId(HttpServletRequest request, HttpServletResponse response) {
         //取出前端参数
         String clueId = request.getParameter("clueId");
 
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
         List<Activity> activityList = clueService.getActivityByClueId(clueId);
 
         //返回json
         PrintJson.printJsonObj(response, activityList);
     }
+    @RequestMapping(path="/getRemarkListByClueId.do")
+    private void getRemarkListByClueId(HttpServletRequest request,HttpServletResponse response){
+        //取出前端参数
+        String clueId = request.getParameter("clueId");
 
+        List<ClueRemark> clueRemarkList=clueService.getRemarkListByClueId(clueId);
+
+        //返回json
+        PrintJson.printJsonObj(response,clueRemarkList);
+    }
+    @RequestMapping(path="/unbund.do")
     private void unbund(HttpServletRequest request, HttpServletResponse response) {
         //取出需要取消关联的relationId
         String relationId = request.getParameter("relationId");
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
         boolean flag = clueService.unbund(relationId);
         //返回json
         PrintJson.printJsonFlag(response, flag);
     }
 
-
+    @RequestMapping(path="/getActivityListByNameAndNotRelationClueId.do")
     private void getActivityListByNameAndNotRelationClueId(HttpServletRequest request, HttpServletResponse response) {
         //取出clueId和activityName
         //根据市场活动名称模糊查询，并且没关联当前clueId的activity
@@ -231,27 +196,21 @@ public class ClueController extends HttpServlet {
         Map<String, String> map = new HashMap<>();
         map.put("activityName", activityName);
         map.put("clueId", clueId);
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
         List<Activity> list = clueService.getActivityByNameAndNotRelationClueId(map);
 
         //返回json
         PrintJson.printJsonObj(response, list);
     }
-
+    @RequestMapping(path="/bund.do")
     private void bund(HttpServletRequest request, HttpServletResponse response) {
         //取出clueId和activityId
         String clueId = request.getParameter("clueId");
         String[] activityIds = request.getParameterValues("activityId");
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
         boolean flag = clueService.bund(clueId, activityIds);
         //返回json
         PrintJson.printJsonFlag(response, flag);
     }
-
+    @RequestMapping(path="/getUserListAndClue.do")
     private void getUserListAndClue(HttpServletRequest request, HttpServletResponse response) {
         //取出前端参数clueId
         String clueId = request.getParameter("clueId");
@@ -259,14 +218,12 @@ public class ClueController extends HttpServlet {
         data
             {"userList":[{1},{2},...],"clue":{clue}}
          */
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
+
         Map<String, Object> map = clueService.getUserListAndClue(clueId);
         //返回json
         PrintJson.printJsonObj(response, map);
     }
-
+    @RequestMapping(path="/updateClue.do")
     private void updateClue(HttpServletRequest request, HttpServletResponse response) {
         //取出前端参数
         String id = request.getParameter("id");
@@ -309,36 +266,30 @@ public class ClueController extends HttpServlet {
         clue.setAddress(address);
         clue.setEditTime(editTime);
         clue.setEditBy(editBy);
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
+
         boolean flag = clueService.updateClue(clue);
         //返回json
         PrintJson.printJsonFlag(response, flag);
     }
-
+    @RequestMapping(path="/deleteClueByIds.do")
     private void deleteClueByIds(HttpServletRequest request, HttpServletResponse response) {
         //取出前端参数ids
         String[] ids = request.getParameterValues("id");
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
+
         boolean flag = clueService.deleteClueByIds(ids);
         //返回json
         PrintJson.printJsonFlag(response, flag);
     }
-
+    @RequestMapping(path="/getActivityListByName.do")
     private void getActivityListByName(HttpServletRequest request, HttpServletResponse response) {
         //取出前端参数activityName
         String activityName = request.getParameter("activityName");
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
+
         List<Activity> activityList = clueService.getActivityListByName(activityName);
         //返回json
         PrintJson.printJsonObj(response, activityList);
     }
-
+    @RequestMapping(path="/convert.do")
     private void convert(HttpServletRequest request, HttpServletResponse response) throws IOException {
         //取出前端参数clueId
         String clueId=request.getParameter("clueId");
@@ -372,12 +323,21 @@ public class ClueController extends HttpServlet {
             tran.setStage(stage);
             tran.setActivityId(activityId);
         }
-        //调用业务层
-        IClueService clueService = (IClueService)
-                ServiceFactory.getService(new ClueServiceImpl());
+
         boolean flag=clueService.convert(tran,clueId,createBy);
         if(flag){
             response.sendRedirect(request.getContextPath()+"/workbench/clue/index.jsp");
         }
+    }
+    @RequestMapping(path="/getCharts.do")
+    private void getCharts(HttpServletRequest request,HttpServletResponse response){
+        /*
+        data
+            {"total":10,"dataList":[{value: 60, name: '访问'},{},...]}
+        */
+
+        Map<String,Object> map=clueService.getCharts();
+        //返回json
+        PrintJson.printJsonObj(response,map);
     }
 }

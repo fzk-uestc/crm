@@ -4,6 +4,7 @@ import com.fzk.crm.settings.domain.DicValue;
 import com.fzk.crm.settings.service.IDicService;
 import com.fzk.crm.settings.service.impl.DicServiceImpl;
 import com.fzk.crm.utils.ServiceFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -27,6 +28,7 @@ public class SysInitListener implements ServletContextListener {
         IDicService dicService =
                 (IDicService) ServiceFactory.
                         getService(new DicServiceImpl());
+
         /*
         应该向业务层要按typeCode分类的7个list
          map<String,List<DicValue>>

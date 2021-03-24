@@ -1,6 +1,8 @@
 package com.fzk.crm.settings.dao;
 
 import com.fzk.crm.settings.domain.User;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
@@ -15,4 +17,5 @@ public interface UserDao {
     List<User> getUserList();
 
     User getUserById(String id);
+
 }

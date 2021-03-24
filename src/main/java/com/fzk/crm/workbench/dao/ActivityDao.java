@@ -3,6 +3,7 @@ package com.fzk.crm.workbench.dao;
 import com.fzk.crm.vo.PaginationVO;
 import com.fzk.crm.workbench.domain.Activity;
 import org.apache.ibatis.annotations.Insert;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -29,4 +30,8 @@ public interface ActivityDao {
     List<Activity> getActivityByNameAndNotRelationClueId(Map<String,String> map);
 
     List<Activity> getActivityListByName(String activityName);
+
+    int getTotal();
+
+    List<Map<String, Object>> getCharts();
 }

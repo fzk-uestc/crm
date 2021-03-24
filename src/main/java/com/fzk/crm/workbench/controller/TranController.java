@@ -2,21 +2,19 @@ package com.fzk.crm.workbench.controller;
 
 import com.fzk.crm.settings.domain.User;
 import com.fzk.crm.settings.service.IUserService;
-import com.fzk.crm.settings.service.impl.UserServiceImpl;
 import com.fzk.crm.utils.DateTimeUtil;
 import com.fzk.crm.utils.PrintJson;
-import com.fzk.crm.utils.ServiceFactory;
 import com.fzk.crm.utils.UUIDUtil;
 import com.fzk.crm.vo.PaginationVO;
-import com.fzk.crm.workbench.dao.TranHistoryDao;
 import com.fzk.crm.workbench.domain.Activity;
 import com.fzk.crm.workbench.domain.Contacts;
 import com.fzk.crm.workbench.domain.Tran;
 import com.fzk.crm.workbench.domain.TranHistory;
 import com.fzk.crm.workbench.service.ICustomerService;
 import com.fzk.crm.workbench.service.ITranService;
-import com.fzk.crm.workbench.service.impl.CustomerServiceImpl;
-import com.fzk.crm.workbench.service.impl.TranServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -32,37 +30,19 @@ import java.util.Map;
  * @author fzkstart
  * @create 2021-03-14 12:37
  */
+@Controller(value = "tranController")
+@RequestMapping(path = "/workbench/transaction")
 public class TranController extends HttpServlet {
-    @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("进入到交易控制器...");
-        String path = request.getServletPath();
-        if ("/workbench/transaction/addTran.do".equals(path)) {
-            addTran(request, response);
-        } else if ("/workbench/transaction/getActivityListByName.do".equals(path)) {
-            getActivityListByName(request, response);
-        } else if ("/workbench/transaction/getContactsListByName.do".equals(path)) {
-            getContactsListByName(request, response);
-        } else if ("/workbench/transaction/getCustomerNameList.do".equals(path)) {
-            getCustomerNameList(request, response);
-        } else if ("/workbench/transaction/saveTran.do".equals(path)) {
-            saveTran(request, response);
-        } else if ("/workbench/transaction/detail.do".equals(path)) {
-            detail(request, response);
-        } else if ("/workbench/transaction/getTranHistoryListByTranId.do".equals(path)) {
-            getTranHistoryListByTranId(request, response);
-        } else if ("/workbench/transaction/changeStage.do".equals(path)) {
-            changeStage(request, response);
-        } else if ("/workbench/transaction/pageList.do".equals(path)) {
-            pageList(request, response);
-        } else if ("/workbench/transaction/getCharts.do".equals(path)) {
-            getCharts(request, response);
-        }
+    @Autowired
+    private IUserService userService;
+    @Autowired
+    private ITranService tranService;
+    @Autowired
+    private ICustomerService customerService;
 
-    }
-
+    @RequestMapping(path = "/addTran.do")
     private void addTran(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        IUserService userService = (IUserService) ServiceFactory.getService(new UserServiceImpl());
+//        IUserService userService = (IUserService) ServiceFactory.getService(new UserServiceImpl());
         List<User> userList = userService.getUserList();
 
         request.setAttribute("userList", userList);
@@ -70,37 +50,40 @@ public class TranController extends HttpServlet {
         request.getRequestDispatcher("/workbench/transaction/save.jsp").forward(request, response);
     }
 
+    @RequestMapping(path = "/getActivityListByName.do")
     private void getActivityListByName(HttpServletRequest request, HttpServletResponse response) {
         //取出前端参数activityName
         String activityName = request.getParameter("activityName");
         //调用业务层
-        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+//        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
         List<Activity> activityList = tranService.getActivityListByName(activityName);
         //返回json
         PrintJson.printJsonObj(response, activityList);
     }
 
+    @RequestMapping(path = "/getContactsListByName.do")
     private void getContactsListByName(HttpServletRequest request, HttpServletResponse response) {
         //取出前端参数contactsName
         String contactsName = request.getParameter("contactsName");
         //调用业务层
-        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+//        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
         List<Contacts> contactsList = tranService.getContactsListByName(contactsName);
         //返回json
         PrintJson.printJsonObj(response, contactsList);
     }
 
-
+    @RequestMapping(path = "/getCustomerNameList.do")
     private void getCustomerNameList(HttpServletRequest request, HttpServletResponse response) {
         //取出插件传来的参数
         String customerName = request.getParameter("name");
         //调用业务层
-        ICustomerService customerService = (ICustomerService) ServiceFactory.getService(new CustomerServiceImpl());
+//        ICustomerService customerService = (ICustomerService) ServiceFactory.getService(new CustomerServiceImpl());
         List<String> customerNameList = customerService.getCustomerNameList(customerName);
         //返回json
         PrintJson.printJsonObj(response, customerNameList);
     }
 
+    @RequestMapping(path = "/saveTran.do")
     private void saveTran(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String id = UUIDUtil.getUUID();
         String createTime = DateTimeUtil.getSysTime();
@@ -140,7 +123,7 @@ public class TranController extends HttpServlet {
         tran.setNextContactTime(nextContactTime);
 
         //调用业务层
-        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+//        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
         boolean flag = tranService.saveTran(tran, customerName);
         if (flag) {
             //重定向到index.jsp
@@ -148,11 +131,12 @@ public class TranController extends HttpServlet {
         }
     }
 
+    @RequestMapping(path = "/detail.do")
     private void detail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //取出前端参数tranId
         String tranId = request.getParameter("tranId");
         //调用业务层
-        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+//        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
         Tran tran = tranService.detail(tranId);
 
         /*
@@ -169,15 +153,17 @@ public class TranController extends HttpServlet {
         request.getRequestDispatcher("/workbench/transaction/detail.jsp").forward(request, response);
     }
 
+    @RequestMapping(path = "/getTranHistoryListByTranId.do")
     private void getTranHistoryListByTranId(HttpServletRequest request, HttpServletResponse response) {
         String tranId = request.getParameter("tranId");
         //调用业务层
-        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+//        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
         List<TranHistory> tranHistoryList = tranService.getTranHistoryListByTranId(tranId);
         //返回json
         PrintJson.printJsonObj(response, tranHistoryList);
     }
 
+    @RequestMapping(path = "/changeStage.do")
     private void changeStage(HttpServletRequest request, HttpServletResponse response) {
         //取出前端参数,tranId,stage,money,expectedDate
         String tranId = request.getParameter("tranId");
@@ -198,7 +184,7 @@ public class TranController extends HttpServlet {
         tran.setEditTime(editTime);
 
         //调用业务层
-        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+//        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
         boolean flag = tranService.changeStage(tran);
 
         Map<String, Object> map = new HashMap<>();
@@ -208,6 +194,7 @@ public class TranController extends HttpServlet {
         PrintJson.printJsonObj(response, map);
     }
 
+    @RequestMapping(path = "/pageList.do")
     private void pageList(HttpServletRequest request, HttpServletResponse response) {
         //取出前端参数
         String pageNoStr = request.getParameter("pageNo");
@@ -239,7 +226,7 @@ public class TranController extends HttpServlet {
 
 
         //调用业务层
-        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+//        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
         /*
         data
             {"total":100,"dataList":[{线索1},{2},{3}...]}
@@ -250,16 +237,17 @@ public class TranController extends HttpServlet {
         PrintJson.printJsonObj(response, vo);
     }
 
+    @RequestMapping(path = "/getCharts.do")
     private void getCharts(HttpServletRequest request, HttpServletResponse response) {
         /*
         data
             {"total":10,"dataList":[{value: 60, name: '访问'},{},...]}
         */
         //调用业务层
-        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
-        Map<String,Object> map=tranService.getCharts();
+//        ITranService tranService = (ITranService) ServiceFactory.getService(new TranServiceImpl());
+        Map<String, Object> map = tranService.getCharts();
         //返回json
-        PrintJson.printJsonObj(response,map);
+        PrintJson.printJsonObj(response, map);
     }
 
 }

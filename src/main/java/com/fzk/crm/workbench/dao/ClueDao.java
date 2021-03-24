@@ -18,4 +18,8 @@ public interface ClueDao {
     int updateClue(Clue clue);
 
     int deleteClueByIds(String[] ids);
+
+    int getTotal();
+
+    List<Map<String, Object>> getCharts();
 }
